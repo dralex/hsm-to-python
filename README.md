@@ -1,8 +1,8 @@
 # HSM-to-Python Framework
 
-The HSM diagrams to Python code translator.
+The HSM diagrams to Python code translator. See details about HSM here: https://platform.kruzhok.org/programming
 
-The the test direcroty with diagrams examples.
+See the test directory with diagrams examples.
 
 Requirements:
 
