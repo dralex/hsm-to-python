@@ -1,0 +1,13 @@
+# Constants
+
+import sys
+import time
+import pysm
+
+TICK_LEN = 100
+
+def DISPATCH_VALUE(origin, event, value):
+    origin.dispatch(event, str(value) if value is not None else None)
+
+def DISPATCH_SM(origin, event):
+    DISPATCH_VALUE(origin, event, None)
