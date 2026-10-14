@@ -26,10 +26,10 @@ generated, the `hsmd` module of the dispatcher and the `CyberiadaML` module.
 ### The diagram
 
 The action text of the diagram is Python; the names it uses come from the
-convention comments of the diagram. A convention comment is a formal
-comment named by its key, or an informal comment whose first line is the
-key (the form of the yEd diagrams); the key is matched without regard to
-case, underscores and a trailing colon:
+convention comments of the diagram. A convention comment is a formal comment
+named by its key, or an informal comment whose first line is the key (the
+form of the yEd diagrams); the key is matched without regard to case,
+underscores and a trailing colon:
 
 | Key | Content |
 |---|---|
@@ -37,6 +37,9 @@ case, underscores and a trailing colon:
 | `Init Scripts` | names of `.py` files beside the diagram, inlined into the program |
 | `SM Constructor Arguments` | `name = value` lines, variables with their defaults |
 | `loop` | code run on every iteration of the loop |
+
+The convention comments of every machine of the document count, in the
+document order, whichever machine runs.
 
 The program posts the events `INIT` (once, after the start), `TIME_TICK`
 (every `--tick` milliseconds) and `TIME_TICK_1S` (every second). The text of
@@ -70,8 +73,9 @@ prints its output. The diagrams are CyberiadaML except `term_node.graphml`,
 kept in the yEd dialect. `vacuum.graphml`, a robot vacuum cleaner, is the
 full example: two machines with a submachine state, history, deferred and
 propagated events, a choice, event parameters, a component defined in the
-init script `vacuum_battery.py`, and every convention comment. When the dispatcher is not installed, the tests
-take it from `../hsm-dispatcher-py` beside this repository.
+init script `vacuum_battery.py`, and every convention comment. When the
+dispatcher is not installed, the tests take it from `../hsm-dispatcher-py`
+beside this repository.
 
 ## Requirements
 

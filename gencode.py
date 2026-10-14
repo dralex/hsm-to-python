@@ -80,12 +80,14 @@ class CodeGenerator:
         except hsmd_reader.DocumentError as e:
             raise ParserError(str(e)) from e
         self.machine = self.__select(machines, main)
+        # the convention comments belong to the program: every machine's count
         self.sections = {}
-        for name, body in self.machine.comments:
-            self.__section(name, body.split('\n'))
-        for body in self.machine.informal:
-            lines = body.split('\n')
-            self.__section(lines[0], lines[1:])
+        for machine in machines:
+            for name, body in machine.comments:
+                self.__section(name, body.split('\n'))
+            for body in machine.informal:
+                lines = body.split('\n')
+                self.__section(lines[0], lines[1:])
 
     def __select(self, machines, main):
         if main is None:
