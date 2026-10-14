@@ -179,18 +179,20 @@ class CodeGenerator:
 
     def generate_code(self, target=None):
         """Write the program to the file, or to the standard output."""
-        f = open(target, 'w', encoding='utf-8') if target is not None else sys.stdout
-        try:
-            self.__write_technical_info(f)
-            self.__insert_file(f, HEADER_TEMPLATE)
-            self.__write_constants(f)
-            self.__write_arguments(f)
-            self.__write_section(f, 'Global initialization', self.__lines(SECTION_INIT))
-            self.__write_scripts(f)
-            self.__write_footer(f)
-        finally:
-            if target is not None:
-                f.close()
+        if target is None:
+            self.__write(sys.stdout)
+            return
+        with open(target, 'w', encoding='utf-8') as f:
+            self.__write(f)
+
+    def __write(self, f):
+        self.__write_technical_info(f)
+        self.__insert_file(f, HEADER_TEMPLATE)
+        self.__write_constants(f)
+        self.__write_arguments(f)
+        self.__write_section(f, 'Global initialization', self.__lines(SECTION_INIT))
+        self.__write_scripts(f)
+        self.__write_footer(f)
 
 
 def arguments(description):
@@ -205,7 +207,7 @@ def arguments(description):
     return parser
 
 
-def main():
+def run():
     parser = arguments('Generate the Python program of a state machine diagram.')
     parser.add_argument('output', nargs='?', help='the program file (default: stdout)')
     args = parser.parse_args()
@@ -221,4 +223,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(run())

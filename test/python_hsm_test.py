@@ -34,7 +34,7 @@ DISPATCHER_DIR = os.path.join('..', '..', 'hsm-dispatcher-py')
 
 sys.path.append('..')
 try:
-    import hsmd
+    import hsmd  # pylint: disable=unused-import
 except ImportError:
     sys.path.append(DISPATCHER_DIR)
     os.environ['PYTHONPATH'] = os.pathsep.join(

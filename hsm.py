@@ -33,7 +33,7 @@ EXIT_GENERATOR = 2
 EXIT_UNEXPECTED = 3
 
 
-def main():
+def run():
     parser = gencode.arguments('Run a state machine diagram on the HSM dispatcher.')
     parser.add_argument('--keep', action='store_true', help='keep the generated program')
     args = parser.parse_args()
@@ -60,4 +60,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(run())
