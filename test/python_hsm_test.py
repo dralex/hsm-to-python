@@ -41,6 +41,9 @@ except ImportError:
         p for p in (os.environ.get('PYTHONPATH', ''), os.path.abspath(DISPATCHER_DIR)) if p)
 
 import gencode
+import hsmcheck
+
+LINT_DIR = 'lint'
 
 def get_tests():
     tests = {}
@@ -73,6 +76,13 @@ def run_tests(tests, verbose=False):
         print('Test {}: '.format(filebase), end='')
         try:
             g = gencode.CodeGenerator(graphfile)
+            findings, _ = hsmcheck.check(g)
+            errors = [str(f) for f in findings if f.severity == hsmcheck.ERROR]
+            if errors:
+                raise Exception('failed: the code check: ' + '; '.join(errors))
+            if verbose:
+                for finding in findings:
+                    print('\n    ' + str(finding), end='')
             g.generate_code(TMP_FILE)
             result = subprocess.run([PYTHON_CMD, TMP_FILE],
                                     capture_output=True,
@@ -91,9 +101,32 @@ def run_tests(tests, verbose=False):
             print('Script failed: {}\n\n Program:{}\n'.format(e.stderr, TMP_FILE))
             sys.exit(1)
 
+def run_lint_tests():
+    """The diagrams with planted faults: the findings are compared with the
+    expected `severity element line rule` lines when pylint is the linter."""
+    if hsmcheck.linter() != hsmcheck.PYLINT:
+        print('Lint tests skipped: pylint is not installed')
+        return
+    for filename in sorted(os.listdir(LINT_DIR)):
+        if not filename.endswith(TEST_GRAPHML_EXT):
+            continue
+        name = filename[:-len(TEST_GRAPHML_EXT)]
+        print('Lint test {}: '.format(name), end='')
+        with open(os.path.join(LINT_DIR, name + TEST_OUTPUT_EXT), encoding='utf-8') as f:
+            expected = f.read()
+        findings, _ = hsmcheck.check(gencode.CodeGenerator(os.path.join(LINT_DIR, filename)))
+        output = ''.join('{} {} {} {}\n'.format(f.severity, f.element or '-', f.line or '-',
+                                                 f.rule) for f in findings)
+        if output != expected:
+            print('failed: required="{}" output="{}"'.format(expected, output))
+            sys.exit(1)
+        print('OK')
+
+
 if __name__ == '__main__':
     verbose = len(sys.argv) > 1 and sys.argv[1] == '-v'
     tests = get_tests()
     run_tests(tests, verbose)
     os.remove(TMP_FILE)
+    run_lint_tests()
     sys.exit(0)

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dName" for="graph" attr.name="name" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine"/>
+  <key id="dRegion" for="graph" attr.name="region"/>
+  <key id="dSubmachineState" for="node" attr.name="submachineState" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <graph id="G" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">Bad</data>
+    <node id="nMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+name/ Lint test</data>
+    </node>
+    <node id="cCounter">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT counter</data>
+      <data key="dData">type/ Counter</data>
+    </node>
+    <node id="nInit">
+      <data key="dNote">informal</data>
+      <data key="dData">Global Initialization
+
+import os
+debug = print
+foo = 1</data>
+    </node>
+    <node id="nScripts">
+      <data key="dNote">informal</data>
+      <data key="dData">Init Scripts
+
+bad_counter.py</data>
+    </node>
+    <node id="init">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="a">
+      <data key="dName">A</data>
+      <data key="dData">entry/
+debg('a')
+counter.add(2)
+
+TICK/
+total = counter.value
+counter.drian(1)</data>
+    </node>
+    <node id="b">
+      <data key="dName">B</data>
+      <data key="dData">entry/
+debug('b', total)</data>
+    </node>
+    <node id="fin">
+      <data key="dVertex">final</data>
+    </node>
+    <edge id="init-a" source="init" target="a"/>
+    <edge id="a-b" source="a" target="b">
+      <data key="dData">GO [foo ==]/
+debug('go')</data>
+    </edge>
+    <edge id="b-fin" source="b" target="fin">
+      <data key="dData">STOP/
+counter.ad(1)</data>
+    </edge>
+  </graph>
+</graphml>

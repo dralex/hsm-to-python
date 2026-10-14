@@ -1,0 +1,5 @@
+error a-b 1 syntax-error
+error a 1 undefined-variable
+error a 2 no-member
+error b-fin 1 no-member
+warning - - unused-import
