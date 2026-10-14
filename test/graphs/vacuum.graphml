@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dName" for="graph" attr.name="name" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine"/>
+  <key id="dRegion" for="graph" attr.name="region"/>
+  <key id="dSubmachineState" for="node" attr.name="submachineState" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <graph id="M" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">Cleaner</data>
+    <node id="nMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+name/ Vacuum cleaner
+
+description/ The complex example of hsm-to-python: a robot vacuum cleaner
+with a calibration procedure, a cleaning job interrupted by obstacles and
+by the battery, and orders deferred while it is busy.</data>
+    </node>
+    <node id="cBattery">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT battery</data>
+      <data key="dData">type/ Battery
+
+threshold/ 20</data>
+    </node>
+    <node id="nInit">
+      <data key="dNote">informal</data>
+      <data key="dData">Global Initialization
+
+debug = print
+iteration = 0
+steps = 0
+
+# the stimuli of the test: the iteration of the loop -&gt; the event
+SCRIPT = {
+    2: ('CALIBRATE', {}),
+    6: ('ORDER', {'room': 'garage'}),
+    8: ('ORDER', {'room': 'kitchen'}),
+    12: ('OBSTACLE', {'distance': 40}),
+    16: ('ORDER', {'room': 'hall'}),
+    19: ('OBSTACLE', {'distance': 5}),
+    28: ('DONE', {}),
+    31: ('SHUTDOWN', {}),
+}
+
+debug('start')</data>
+    </node>
+    <node id="nScripts">
+      <data key="dNote">informal</data>
+      <data key="dData">Init Scripts
+
+vacuum_battery.py</data>
+    </node>
+    <node id="nArguments">
+      <data key="dNote">informal</data>
+      <data key="dData">SM Constructor Arguments
+
+allowed = 'kitchen'</data>
+    </node>
+    <node id="nLoop">
+      <data key="dNote">informal</data>
+      <data key="dData">loop
+
+global iteration
+iteration += 1
+if iteration in SCRIPT:
+    name, parameters = SCRIPT[iteration]
+    DISPATCH(name, **parameters)</data>
+    </node>
+    <node id="init">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="idle">
+      <data key="dName">Idle</data>
+      <data key="dData">entry/
+debug('idle')</data>
+    </node>
+    <node id="calib">
+      <data key="dSubmachineState">C</data>
+      <data key="dName">Calibration</data>
+      <graph id="calib:" edgedefault="directed">
+        <node id="calib::start">
+          <data key="dVertex">entryPoint</data>
+          <data key="dName">Start</data>
+        </node>
+        <node id="calib::done">
+          <data key="dVertex">exitPoint</data>
+          <data key="dName">Done</data>
+        </node>
+      </graph>
+    </node>
+    <node id="pick">
+      <data key="dVertex">choice</data>
+    </node>
+    <node id="working">
+      <data key="dName">Working</data>
+      <data key="dData">entry/
+debug('working')
+
+exit/
+debug('working done, battery', battery.level)
+
+ORDER/ defer</data>
+      <graph id="working:" edgedefault="directed">
+        <data key="dRegion"/>
+        <node id="winit">
+          <data key="dVertex">initial</data>
+        </node>
+        <node id="h">
+          <data key="dVertex">shallowHistory</data>
+        </node>
+        <node id="sweeping">
+          <data key="dName">Sweeping</data>
+          <data key="dData">entry/
+debug('sweeping')
+
+TIME_TICK/
+battery.drain(7)
+
+OBSTACLE [else]/
+debug('obstacle ignored at', event.distance)
+
+battery.LOW propagate/
+debug('low battery at', event.level)</data>
+        </node>
+        <node id="avoiding">
+          <data key="dName">Avoiding</data>
+          <data key="dData">entry/
+debug('avoiding')
+global steps
+steps = 0
+
+TIME_TICK [steps &lt; 1]/
+global steps
+steps += 1
+battery.drain(7)
+
+battery.LOW propagate/
+debug('low battery at', event.level)</data>
+        </node>
+      </graph>
+    </node>
+    <node id="charging">
+      <data key="dName">Charging</data>
+      <data key="dData">entry/
+debug('charging')
+
+TIME_TICK [battery.level &lt; 100]/
+battery.charge(40)
+
+ORDER/ defer</data>
+    </node>
+    <node id="fin">
+      <data key="dVertex">final</data>
+    </node>
+    <edge id="init-idle" source="init" target="idle"/>
+    <edge id="idle-calib::start" source="idle" target="calib::start">
+      <data key="dData">CALIBRATE/</data>
+    </edge>
+    <edge id="calib::done-idle" source="calib::done" target="idle"/>
+    <edge id="idle-pick" source="idle" target="pick">
+      <data key="dData">ORDER/</data>
+    </edge>
+    <edge id="pick-working" source="pick" target="working">
+      <data key="dData">[event.room == allowed]/
+debug('order accepted:', event.room)</data>
+    </edge>
+    <edge id="pick-idle" source="pick" target="idle">
+      <data key="dData">[else]/
+debug('order refused:', event.room)</data>
+    </edge>
+    <edge id="idle-fin" source="idle" target="fin">
+      <data key="dData">SHUTDOWN/
+debug('shutdown')</data>
+    </edge>
+    <edge id="winit-sweeping" source="winit" target="sweeping"/>
+    <edge id="h-sweeping" source="h" target="sweeping"/>
+    <edge id="sweeping-avoiding" source="sweeping" target="avoiding">
+      <data key="dData">OBSTACLE [event.distance &lt; 10]/
+debug('obstacle at', event.distance)</data>
+    </edge>
+    <edge id="avoiding-sweeping" source="avoiding" target="sweeping">
+      <data key="dData">TIME_TICK [steps &gt;= 1]/</data>
+    </edge>
+    <edge id="working-charging" source="working" target="charging">
+      <data key="dData">battery.LOW/</data>
+    </edge>
+    <edge id="charging-h" source="charging" target="h">
+      <data key="dData">TIME_TICK [battery.level &gt;= 100]/
+debug('charged')</data>
+    </edge>
+    <edge id="working-idle" source="working" target="idle">
+      <data key="dData">DONE/</data>
+    </edge>
+  </graph>
+  <graph id="C" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">Calibrate</data>
+    <node id="cinit">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="cstart">
+      <data key="dVertex">entryPoint</data>
+      <data key="dName">Start</data>
+    </node>
+    <node id="cdone">
+      <data key="dVertex">exitPoint</data>
+      <data key="dName">Done</data>
+    </node>
+    <node id="measure">
+      <data key="dName">Measure</data>
+      <data key="dData">entry/
+debug('measuring')</data>
+    </node>
+    <node id="adjust">
+      <data key="dName">Adjust</data>
+      <data key="dData">entry/
+debug('adjusting')</data>
+    </node>
+    <edge id="cinit-measure" source="cinit" target="measure"/>
+    <edge id="cstart-measure" source="cstart" target="measure"/>
+    <edge id="measure-adjust" source="measure" target="adjust">
+      <data key="dData">TIME_TICK/</data>
+    </edge>
+    <edge id="adjust-cdone" source="adjust" target="cdone">
+      <data key="dData">TIME_TICK/
+debug('calibrated')</data>
+    </edge>
+  </graph>
+</graphml>

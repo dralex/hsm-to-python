@@ -1,0 +1,26 @@
+start
+idle
+measuring
+adjusting
+calibrated
+idle
+order refused: garage
+idle
+order accepted: kitchen
+working
+sweeping
+obstacle ignored at 40
+obstacle at 5
+avoiding
+low battery at 16
+working done, battery 16
+charging
+charged
+working
+avoiding
+sweeping
+working done, battery 79
+idle
+order refused: hall
+idle
+shutdown
