@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # The HSM-to-Python testing infrastructure
 #
-# Copyright (C) 2023-2025      Alexey Fedoseev <aleksey@fedoseev.net>
+# Copyright (C) 2023-2026      Alexey Fedoseev <aleksey@fedoseev.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,19 +23,22 @@ import os
 import subprocess
 import re
 
-PROGRAM_PREAMBLE = """import sys
-import pysm
-sys.path.append('..')
-"""
-
 TESTS_DIR = 'graphs'
 TEST_PATTERN = re.compile(r'(?P<filebase>[^-]+)(-(?P<number>\d+))?.graphml$')
 TEST_GRAPHML_EXT = '.graphml'
 TEST_OUTPUT_EXT = '.txt'
 TMP_FILE = 'tmp.py'
-PYTHON_CMD = 'python3'
+PYTHON_CMD = sys.executable
+# the dispatcher beside this repository, when it is not installed
+DISPATCHER_DIR = os.path.join('..', '..', 'hsm-dispatcher-py')
 
 sys.path.append('..')
+try:
+    import hsmd
+except ImportError:
+    sys.path.append(DISPATCHER_DIR)
+    os.environ['PYTHONPATH'] = os.pathsep.join(
+        p for p in (os.environ.get('PYTHONPATH', ''), os.path.abspath(DISPATCHER_DIR)) if p)
 
 import gencode
 
@@ -69,7 +72,7 @@ def run_tests(tests, verbose=False):
         output = open(outputfile).read()
         print('Test {}: '.format(filebase), end='')
         try:
-            g = gencode.CodeGenerator(graphfile, generate_loop=True, allow_empty_trans=True)
+            g = gencode.CodeGenerator(graphfile)
             g.generate_code(TMP_FILE)
             result = subprocess.run([PYTHON_CMD, TMP_FILE],
                                     capture_output=True,
@@ -92,4 +95,5 @@ if __name__ == '__main__':
     verbose = len(sys.argv) > 1 and sys.argv[1] == '-v'
     tests = get_tests()
     run_tests(tests, verbose)
+    os.remove(TMP_FILE)
     sys.exit(0)

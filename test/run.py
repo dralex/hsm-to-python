@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # The HSM-to-Python testing script
 #
-# Copyright (C) 2023-2025      Alexey Fedoseev <aleksey@fedoseev.net>
+# Copyright (C) 2023-2026      Alexey Fedoseev <aleksey@fedoseev.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import subprocess
 sys.path.append('..')
 import gencode
 
-PYTHON_CMD = 'python3'
+PYTHON_CMD = sys.executable
 TMP_FILE = 'tmp.py'
 
 def run_script(filename):
@@ -37,7 +37,7 @@ def run_script(filename):
         print('Cannot find file {}'.format(filename))
         sys.exit(1)
     try:
-        g = gencode.CodeGenerator(filename, generate_loop=True, allow_empty_trans=True)
+        g = gencode.CodeGenerator(filename)
         g.generate_code(TMP_FILE)
         result = subprocess.run([PYTHON_CMD, TMP_FILE],
                                 capture_output=True,
@@ -45,11 +45,8 @@ def run_script(filename):
                                 check=True)
         print(result.stdout)
         print('OK')
-    except gencode.ConvertorError:
-        if output == 'HSMException\n':
-            print('OK')
-            sys.exit(0)
-        print('failed: {}\n\n Program:{}\n'.format(s, TMP_FILE))
+    except gencode.ConvertorError as e:
+        print('failed: {}\n\n Program:{}\n'.format(e, TMP_FILE))
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         print('Script failed: {}\n\n Program graph:{} Program: {}\n'.format(e.stderr, filename, TMP_FILE))
