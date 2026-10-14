@@ -1,0 +1,22 @@
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_PACKAGE_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(CPACK_PACKAGE_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(CPACK_PACKAGE_VERSION_PATCH @PROJECT_VERSION_PATCH@)
+set(CPACK_PACKAGE_VENDOR "Kruzhok Association")
+set(CPACK_PACKAGE_CONTACT "aleksey@fedoseev.net")
+set(CPACK_RESOURCE_FILE_LICENSE "@PROJECT_SOURCE_DIR@/LICENSE")
+set(CPACK_RESOURCE_FILE_README "@PROJECT_SOURCE_DIR@/README.md")
+
+# the pure Python modules, the commands and the plugin of the editor
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "all")
+set(CPACK_DEBIAN_PACKAGE_NAME "python3-hsm-to-python")
+set(CPACK_DEBIAN_PACKAGE_SECTION "python")
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "The Python programs of the CyberiadaML HSM diagrams
+Generates and runs the Python program of a state machine diagram on the HSM
+dispatcher: the commands hsm-run, hsm-gencode and hsm-check, the check of the
+Python code of the diagram with a lint tool. Includes the plugin of the
+Cyberiada State Machine Editor.")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "python3 (>= 3.8), python3-hsm-dispatcher (>= 0.1.0), python3-libcyberiadamlpp (>= 1.0.7)")
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "pylint")
+set(CPACK_DEBIAN_PACKAGE_ENHANCES "cyberiada-editor")

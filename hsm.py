@@ -28,6 +28,7 @@ import tempfile
 
 import gencode
 import hsmcheck
+import hsmplugin
 
 EXIT_PARSER = 1
 EXIT_GENERATOR = 2
@@ -35,7 +36,23 @@ EXIT_UNEXPECTED = 3
 EXIT_TIMEOUT = 4
 
 
+def install_plugin():
+    """The --install-editor-plugin [DIR] command."""
+    index = sys.argv.index('--install-editor-plugin')
+    target = sys.argv[index + 1] if index + 1 < len(sys.argv) else None
+    try:
+        folder = hsmplugin.install(target or None)
+    except hsmplugin.PluginError as e:
+        sys.stderr.write('{}\n'.format(e))
+        return EXIT_GENERATOR
+    print('installed the editor plugin {} to\n  {}\nit runs {}; restart the editor'.format(
+        hsmplugin.PLUGIN_ID, folder, sys.executable))
+    return 0
+
+
 def run():
+    if '--install-editor-plugin' in sys.argv:
+        return install_plugin()
     parser = gencode.arguments('Run a state machine diagram on the HSM dispatcher.')
     parser.add_argument('--set', metavar='NAME=VALUE', action='append', default=[],
                         help='the value of an argument of the diagram')
@@ -46,6 +63,9 @@ def run():
     parser.add_argument('--check', action='store_true',
                         help='check the code of the diagram first, refuse it with errors')
     parser.add_argument('--keep', action='store_true', help='keep the generated program')
+    parser.add_argument('--install-editor-plugin', metavar='DIR', nargs='?', const='',
+                        help='copy the editor plugin into the plugin folder of the editor '
+                             '(or into DIR) and exit')
     args = parser.parse_args()
     try:
         generator = gencode.CodeGenerator(args.graph, main=args.main, tick_len=args.tick)

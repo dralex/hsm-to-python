@@ -24,4 +24,9 @@ hsm-gencode = "gencode:run"
 hsm-check = "hsmcheck:run"
 
 [tool.setuptools]
-py-modules = ["gencode", "hsm", "hsmcheck"]
+py-modules = ["gencode", "hsm", "hsmcheck", "hsmplugin"]
+
+# the editor plugin under the install prefix; hsm-run --install-editor-plugin
+# copies it into the plugin folder of the editor
+[tool.setuptools.data-files]
+"share/cyberiada-editor/plugins/hsm-to-python" = ["editor-plugin/plugin.json"]

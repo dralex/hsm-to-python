@@ -3,40 +3,150 @@
   "id": "hsm-to-python",
   "name": "HSM to Python",
   "version": "2.0.0",
-  "description": "Checks the Python code of the diagram, generates its program and runs it on the HSM dispatcher. Needs the hsm-to-python commands (hsm-check, hsm-gencode, hsm-run) with the hsmd and CyberiadaML modules in the PATH of the editor.",
+  "description": "Checks the Python code of the diagram, generates its program and runs it on the HSM dispatcher. Needs the hsm-to-python modules with hsmd and CyberiadaML in the Python the plugin runs with.",
+  "interpreter": "python3",
+  "env": {
+    "PYTHONUTF8": "1"
+  },
   "parameters": [
-    { "id": "main", "type": "string", "label": "State machine", "scope": "document",
-      "default": "", "description": "The state machine to run; empty: the first one" },
-    { "id": "tick", "type": "int", "label": "Tick, ms", "scope": "persistent",
-      "default": 100, "min": 1, "description": "The period of the TIME_TICK event" },
-    { "id": "dir", "type": "dir", "label": "Program directory", "scope": "document",
-      "default": "${document_dir}", "create": true },
-    { "id": "timeout", "type": "int", "label": "Run time limit, s", "scope": "persistent",
-      "default": 60, "min": 0, "description": "0: no limit" },
-    { "id": "settings", "type": "text", "label": "Arguments (name = value per line)",
-      "scope": "document", "default": "", "language": "python" }
+    {
+      "id": "main",
+      "type": "string",
+      "label": "State machine",
+      "scope": "document",
+      "default": "",
+      "description": "The state machine to run; empty: the first one"
+    },
+    {
+      "id": "tick",
+      "type": "int",
+      "label": "Tick, ms",
+      "scope": "persistent",
+      "default": 100,
+      "min": 1,
+      "description": "The period of the TIME_TICK event"
+    },
+    {
+      "id": "dir",
+      "type": "dir",
+      "label": "Program directory",
+      "scope": "document",
+      "default": "${document_dir}",
+      "create": true
+    },
+    {
+      "id": "timeout",
+      "type": "int",
+      "label": "Run time limit, s",
+      "scope": "persistent",
+      "default": 60,
+      "min": 0,
+      "description": "0: no limit"
+    },
+    {
+      "id": "settings",
+      "type": "text",
+      "label": "Arguments (name = value per line)",
+      "scope": "document",
+      "default": "",
+      "language": "python"
+    }
   ],
   "actions": [
-    { "id": "check", "label": "Check the code", "result": "diagnostics", "save": true,
-      "exit_ok": [0, 1], "toolbar": true,
+    {
+      "id": "check",
+      "label": "Check the code",
+      "result": "diagnostics",
+      "save": true,
+      "exit_ok": [
+        0,
+        1
+      ],
+      "toolbar": true,
       "description": "Lint the Python code of the states and the transitions",
-      "argv": ["hsm-check", "${document}", "--json", "${diagnostics}",
-               {"if": "main", "argv": ["--main", "${param:main}"]}],
-      "parameters": ["main"] },
-    { "id": "generate", "label": "Generate the program...", "result": "files", "save": true,
+      "argv": [
+        "-m",
+        "hsmcheck",
+        "${document}",
+        "--json",
+        "${diagnostics}",
+        {
+          "if": "main",
+          "argv": [
+            "--main",
+            "${param:main}"
+          ]
+        }
+      ],
+      "parameters": [
+        "main"
+      ]
+    },
+    {
+      "id": "generate",
+      "label": "Generate the program...",
+      "result": "files",
+      "save": true,
       "outdir": "dir",
       "description": "Write the Python program of the diagram into the directory",
-      "argv": ["hsm-gencode", "${document}", "${outdir}/${document_name}.py",
-               "--tick", "${param:tick}",
-               {"if": "main", "argv": ["--main", "${param:main}"]}],
-      "parameters": ["main", "tick", "dir"] },
-    { "id": "run", "label": "Run the diagram...", "result": "log", "save": true,
-      "timeout": 0, "toolbar": true,
+      "argv": [
+        "-m",
+        "gencode",
+        "${document}",
+        "${outdir}/${document_name}.py",
+        "--tick",
+        "${param:tick}",
+        {
+          "if": "main",
+          "argv": [
+            "--main",
+            "${param:main}"
+          ]
+        }
+      ],
+      "parameters": [
+        "main",
+        "tick",
+        "dir"
+      ]
+    },
+    {
+      "id": "run",
+      "label": "Run the diagram...",
+      "result": "log",
+      "save": true,
+      "timeout": 0,
+      "toolbar": true,
       "description": "Run the diagram on the dispatcher; the output goes to the Output tab",
-      "argv": ["hsm-run", "${document}", "--tick", "${param:tick}",
-               "--timeout", "${param:timeout}",
-               {"if": "main", "argv": ["--main", "${param:main}"]},
-               {"if": "settings", "argv": ["--settings", "${param-file:settings}"]}],
-      "parameters": ["main", "tick", "timeout", "settings"] }
+      "argv": [
+        "-m",
+        "hsm",
+        "${document}",
+        "--tick",
+        "${param:tick}",
+        "--timeout",
+        "${param:timeout}",
+        {
+          "if": "main",
+          "argv": [
+            "--main",
+            "${param:main}"
+          ]
+        },
+        {
+          "if": "settings",
+          "argv": [
+            "--settings",
+            "${param-file:settings}"
+          ]
+        }
+      ],
+      "parameters": [
+        "main",
+        "tick",
+        "timeout",
+        "settings"
+      ]
+    }
   ]
 }
