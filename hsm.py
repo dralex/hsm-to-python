@@ -2,9 +2,9 @@
 # -----------------------------------------------------------------------------
 #  HSM-to-Python conversion tool
 #
-#  The main function
+#  The runner: generates the program of a diagram and runs it
 #
-#  Copyright (C) 2025 Alexey Fedoseev <aleksey@fedoseev.net>
+#  Copyright (C) 2025-2026 Alexey Fedoseev <aleksey@fedoseev.net>
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,44 +21,43 @@
 #
 #  -----------------------------------------------------------------------------
 
+import os
+import subprocess
 import sys
-import traceback
+import tempfile
 
 import gencode
 
-def usage():
-    print('usage: {} <diagram.graphml> [output.py]'.format(sys.argv[0]))
-    sys.exit(1)
+EXIT_PARSER = 1
+EXIT_GENERATOR = 2
+EXIT_UNEXPECTED = 3
 
-if __name__ == '__main__':
 
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        usage()
-
-    graph = sys.argv[1]
-
-    if len(sys.argv) == 3:
-        output = sys.argv[2]
-    else:
-        output = None
-
-    graph = sys.argv[1]
-
+def main():
+    parser = gencode.arguments('Run a state machine diagram on the HSM dispatcher.')
+    parser.add_argument('--keep', action='store_true', help='keep the generated program')
+    args = parser.parse_args()
     try:
-        g = gencode.CodeGenerator(graph, generate_loop=True)
-        g.generate_code(output)
+        generator = gencode.CodeGenerator(args.graph, main=args.main, tick_len=args.tick)
     except gencode.ParserError as e:
         sys.stderr.write('Graph parsing error: {}\n'.format(e))
-        sys.exit(1)
+        return EXIT_PARSER
+    with tempfile.NamedTemporaryFile(prefix='hsm-', suffix='.py', delete=False) as program:
+        path = program.name
+    try:
+        generator.generate_code(path)
+        if args.keep:
+            sys.stderr.write('The program is kept in {}\n'.format(path))
+        return subprocess.run([sys.executable, path], check=False).returncode
     except gencode.GeneratorError as e:
         sys.stderr.write('Code generating error: {}\n'.format(e))
-        sys.exit(2)
-    except gencode.ConvertorError as e:
-        sys.stderr.write('Strange convertor error: {}\n'.format(e))
-        sys.exit(3)
-    except Exception as e:
-        sys.stderr.write('Unexpected exception: {}\n'.format(e.__class__))
-        sys.stderr.write('{}\n'.format(traceback.format_exc()))
-        sys.exit(4)
+        return EXIT_GENERATOR
+    except KeyboardInterrupt:
+        return EXIT_UNEXPECTED
+    finally:
+        if not args.keep:
+            os.remove(path)
 
-    sys.exit(0)
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,0 +1,30 @@
+
+dispatcher = hsmd.Dispatcher(DIAGRAM, machines=[MAIN], namespace=globals())
+
+
+def main():
+    dispatcher.start()
+    dispatcher.post('INIT')
+    dispatcher.run()
+    period = TICK_LEN / 1000.0
+    start = time.monotonic()
+    next_tick = start + period
+    next_second = start + 1.0
+    while not dispatcher.finished():
+        # loop
+        now = time.monotonic()
+        if now >= next_tick:
+            dispatcher.post('TIME_TICK')
+            while next_tick <= now:
+                next_tick += period
+        if now >= next_second:
+            dispatcher.post('TIME_TICK_1S')
+            while next_second <= now:
+                next_second += 1.0
+        dispatcher.tick()
+        time.sleep(period)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
