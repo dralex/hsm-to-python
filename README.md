@@ -67,7 +67,10 @@ Each test is a diagram `test/graphs/<name>.graphml` with the expected output
 of its program in `<name>.txt`; `HSMException` as the expected output means
 the diagram must be refused. `test/run.py <diagram>` runs one diagram and
 prints its output. The diagrams are CyberiadaML except `term_node.graphml`,
-kept in the yEd dialect. When the dispatcher is not installed, the tests
+kept in the yEd dialect. `vacuum.graphml`, a robot vacuum cleaner, is the
+full example: two machines with a submachine state, history, deferred and
+propagated events, a choice, event parameters, a component defined in the
+init script `vacuum_battery.py`, and every convention comment. When the dispatcher is not installed, the tests
 take it from `../hsm-dispatcher-py` beside this repository.
 
 ## Requirements
