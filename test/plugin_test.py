@@ -20,15 +20,20 @@
 # along with this program. If not, see https://www.gnu.org/licenses/
 # -----------------------------------------------------------------------------
 
+import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
 
+sys.path.append('..')
+import hsmplugin  # pylint: disable=wrong-import-position
+
 PLUGIN = 'hsm-to-python'
 REPOSITORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-COMMANDS = ('hsm-check', 'hsm-gencode', 'hsm-run')
+# the dispatcher beside this repository, for the editor's Python
+DISPATCHER = os.path.join(REPOSITORY, '..', 'hsm-dispatcher-py')
 
 
 def editor():
@@ -44,20 +49,50 @@ def editor():
 
 def batch(binary, *args):
     env = dict(os.environ, QT_QPA_PLATFORM='offscreen')
+    paths = [os.path.abspath(REPOSITORY), os.path.abspath(DISPATCHER), env.get('PYTHONPATH', '')]
+    env['PYTHONPATH'] = os.pathsep.join(p for p in paths if p)
     result = subprocess.run([binary, '--batch'] + list(args), stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, universal_newlines=True, env=env,
                             cwd=REPOSITORY, check=False, timeout=120)
     return result.returncode, result.stdout
 
 
-def main():
-    binary = editor()
-    missing = [c for c in COMMANDS if shutil.which(c) is None]
-    if binary is None or missing:
-        print('skipped: {}'.format('no CyberiadaEditor binary' if binary is None
-                                   else 'not in PATH: ' + ' '.join(missing)))
-        return 0
+def installer():
+    """The copy of the plugin into a folder: pinned to this Python, replaced
+    on a second install, a foreign folder refused."""
     failed = 0
+    with tempfile.TemporaryDirectory() as directory:
+        folder = hsmplugin.install(directory)
+        with open(os.path.join(folder, hsmplugin.DESCRIPTOR), encoding='utf-8') as f:
+            descriptor = json.load(f)
+        pinned = ('interpreter' not in descriptor and
+                  all(a['argv'][0] == sys.executable for a in descriptor['actions']))
+        if folder != os.path.join(directory, PLUGIN) or not pinned:
+            print('FAIL install: {} {}'.format(folder, descriptor.get('actions')))
+            failed += 1
+        elif hsmplugin.install(directory) != folder:
+            print('FAIL install twice')
+            failed += 1
+        else:
+            print('ok   install')
+        foreign = os.path.join(directory, 'other')
+        os.makedirs(os.path.join(foreign, PLUGIN))
+        try:
+            hsmplugin.install(foreign)
+        except hsmplugin.PluginError:
+            print('ok   foreign folder refused')
+        else:
+            print('FAIL foreign folder accepted')
+            failed += 1
+    return failed
+
+
+def main():
+    failed = installer()
+    binary = editor()
+    if binary is None:
+        print('skipped the editor part: no CyberiadaEditor binary')
+        return 1 if failed else 0
     code, out = batch(binary, '--plugin-path', '.', '--list-plugins')
     if code != 0 or PLUGIN not in out or 'enabled' not in out:
         print('FAIL list: exit {}\n{}'.format(code, out))
