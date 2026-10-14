@@ -12,14 +12,53 @@ The code is distributed under the GNU General Public License (version 3).
 
 ## Installation
 
-    pip install .
+1. The CyberiadaML libraries with their Python module `CyberiadaML`:
+   `libhtreegeom`, `libcyberiadaml`, `libcyberiadamlpp`,
+   `libcyberiadamlpp-py`, each by its own README (`cmake` and `make install`,
+   or their Debian packages). Check: `python3 -c "import CyberiadaML"`.
+2. The dispatcher `hsm-dispatcher-py` and this tool, either as Debian
+   packages or with pip.
 
-installs the three commands into the active Python environment. The
-dispatcher (`hsm-dispatcher-py`, the module `hsmd`) and the `CyberiadaML`
-module of `libcyberiadamlpp-py` must be installed there as well; neither is
-on a package index, both come from their source trees. The scripts of the
-repository run without installation too (`./hsm.py`, `./gencode.py`,
-`./hsmcheck.py`) when `hsmd` is importable.
+The Debian packages, built in each repository:
+
+    cmake -B build && cd build && ctest && cpack -G DEB
+
+    sudo apt install ./python3-hsm-dispatcher_0.1.0_all.deb
+    sudo apt install ./python3-hsm-to-python_2.0.0_all.deb
+
+`ctest` runs the tests with the Python CMake finds (`-DPython3_EXECUTABLE=...`
+selects another one; the tests of this tool need `hsmd` and `CyberiadaML`
+there). The second package installs the commands `hsm-run`, `hsm-gencode`
+and `hsm-check` and puts the editor plugin into
+`/usr/share/cyberiada-editor/plugins/hsm-to-python/`, where
+`CyberiadaHSM-Editor` finds it; it recommends `pylint` for the code check.
+
+With pip (a virtual environment, the user site, Windows, macOS), the two
+source trees side by side:
+
+    python3 -m venv --system-site-packages venv && . venv/bin/activate
+    pip install ./hsm-dispatcher-py ./hsm-to-python
+    hsm-run --install-editor-plugin
+
+`--system-site-packages` lets the environment see an installed `CyberiadaML`
+module; for a module that is built but not installed, write the build
+directory into a `.pth` file of the environment instead:
+
+    echo /path/to/libcyberiadamlpp-py/build > "$(python -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")/cyberiadaml.pth"
+
+`--install-editor-plugin [DIR]` copies the plugin into the editor's user
+plugin folder (or into DIR), bound to the Python that runs the command, so
+the editor needs no `PATH` of the environment; restart the editor afterwards.
+Checks of the installation, from this repository:
+
+    hsm-check test/graphs/vacuum.graphml      # no findings
+    hsm-run test/graphs/term_node.graphml     # INIT, ENTRY A, ENTRY B, TERM
+    CyberiadaEditor --batch --list-plugins    # hsm-to-python ... enabled
+
+A generated program needs, where it runs, the diagram file at the place it
+had when it was generated, the `hsmd` module and the `CyberiadaML` module.
+The scripts of the repository run without installation too (`./hsm.py`,
+`./gencode.py`, `./hsmcheck.py`) when `hsmd` is importable.
 
 ## Usage
 
@@ -124,10 +163,11 @@ interface, level 1): the actions *Check the code* (the findings appear on
 the elements), *Generate the program...* (into a chosen directory) and *Run
 the diagram...* (the output in the plugin dock, a time limit, the arguments
 as `name = value` lines). Install the directory as `hsm-to-python/` into the
-editor's plugin folder (see the editor's `docs/PLUGIN-API.md`, Packaging).
-The plugin runs the commands `hsm-check`, `hsm-gencode` and `hsm-run`, so
-the environment where they are installed must be in the `PATH` of the
-editor. To try it from the repository:
+editor's plugin folder: the Debian package does it, `hsm-run
+--install-editor-plugin` does it for a pip installation (see Installation,
+and the editor's `docs/PLUGIN-API.md`, Packaging). The plugin runs the
+modules of this tool with the Python it was installed with. To try it from
+the repository, with `hsmd` on the Python path:
 
     CyberiadaEditor --batch test/graphs/vacuum.graphml --plugin-path . \
         --run-plugin hsm-to-python:check --dump-plugin
@@ -161,3 +201,4 @@ tests take it from `../hsm-dispatcher-py` beside this repository.
 * libcyberiadamlpp-py - the Python binding of the libcyberiadamlpp library
   (the `CyberiadaML` module) with its libraries
 * pylint or pyflakes - for the code check (optional)
+* cmake (version 3.16+) - for the Debian package
