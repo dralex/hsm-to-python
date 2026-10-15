@@ -55,8 +55,8 @@ Checks of the installation, from this repository:
     hsm-run test/graphs/term_node.graphml     # INIT, ENTRY A, ENTRY B, TERM
     CyberiadaPro --batch --list-plugins       # hsm-to-python ... enabled
 
-A generated program carries its diagram and needs, where it runs, the
-`hsmd` module and the `CyberiadaML` module.
+A generated program is the Python code of the machine and needs, where it
+runs, the `hsmd` module only.
 The scripts of the repository run without installation too (`./hsm.py`,
 `./gencode.py`, `./hsmcheck.py`) when `hsmd` is importable.
 
@@ -78,11 +78,43 @@ and tell where). `hsm-gencode --check` refuses a diagram with errors, and
 a pipe too; the timeout and a SIGTERM to `hsm-run` stop the program as well
 (on Windows a killed `hsm-run` leaves the program running).
 
-The generated program carries the diagram and the documents its submachine
-states reference (`DOCUMENTS`), so it runs without the diagram files; the
-path of the diagram stays in its header comment. It needs the `hsmd` module
-and the `CyberiadaML` module, and takes `--set`, `--settings` and `--help`
-itself.
+The generated program is the Python code of the machine: the code of every
+state and transition is a function, the structure is one `hsmd.Machine`
+declaration (the machines of the submachine states inlined), and the
+dispatcher runs it. Neither the diagram file nor the `CyberiadaML` module is
+needed; the path of the diagram stays in the header comment. The program
+takes `--set`, `--settings` and `--help` itself.
+
+```python
+def Monitoring_entry():
+    print("Starting site monitor for http://ya.ru")
+
+
+def Monitoring_TIME_TICK_1S():
+    try:
+        urllib.request.urlopen("http://ya.ru", timeout=1)
+        print("http://ya.ru is UP")
+    except Exception as e:
+        print("http://ya.ru is DOWN:", e)
+
+
+machine = hsmd.Machine('SiteMonitor', id='G0', states=[
+    hsmd.Initial(id='n0'),
+    hsmd.State('Monitoring', id='n1', entry=Monitoring_entry, internal=[
+        hsmd.On('TIME_TICK_1S', action=Monitoring_TIME_TICK_1S),
+    ]),
+], transitions=[
+    hsmd.Transition('n0', 'n1'),  # initial -> Monitoring
+])
+```
+
+The functions are named after the elements: `<State>_entry`, `<State>_exit`,
+`<State>_<EVENT>` for an internal transition, `<Source>_<EVENT>_to_<Target>`
+(`<Source>_to_<Target>` without an event) for a transition, `_guard` added for
+a guard; a suffix only when a name is taken. A block is the body of its
+function as written, the names it assigns declared `global`. A syntax error
+in the diagram's code stops the generation with the element and the line;
+an error at run time names the element and the line of the block.
 
 ### The diagram
 
@@ -191,7 +223,7 @@ none and saves the diagram before the run. To try it from the repository, with
     cd test
     python3 python_hsm_test.py      # the diagrams, their code check, the lint tests
     python3 arguments_test.py       # --set, --settings, --help of a generated program
-    python3 embedding_test.py       # a generated program runs without the diagram files
+    python3 standalone_test.py      # a generated program runs without the diagram and CyberiadaML
     python3 plugin_test.py          # the editor plugin in the batch mode of the editor
 
 Each test is a diagram `test/graphs/<name>.graphml` with the expected output
@@ -206,7 +238,9 @@ history, deferred and propagated events, a choice, event parameters, a
 component defined in the init script `vacuum_battery.py`, and every
 convention comment; `formal_comments.graphml` writes them as formal comments
 and keeps the comments that must be ignored; `external.graphml` runs a machine
-of the document `lib/worker.graphml`. The plugin test needs the editor binary
+of the document `lib/worker.graphml`; `code_layout.graphml` keeps the layout of
+the generated code (a multi-line string, a block of comments only, a function
+name the initialization takes). The plugin test needs the editor binary
 (`CYBERIADA_PRO`, the `PATH`, or the sibling build), prints the one it uses
 and says when it skips.
 

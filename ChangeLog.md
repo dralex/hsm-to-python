@@ -3,12 +3,13 @@
 ## Version 2.0.0 (unreleased)
 
 Changed:
-- the generated program runs the diagram on the HSM dispatcher
-  (`hsm-dispatcher-py`) instead of a generated pysm class: the program
-  carries the diagram and the documents its submachine states reference
-  (`DOCUMENTS`) and runs without the files, the path of the diagram is a
-  comment; the standard semantics apply (hierarchy, history, deferred and
-  propagated events, submachine states, several machines);
+- the generated program is the Python code of the machine run by the HSM
+  dispatcher (`hsm-dispatcher-py`) instead of a pysm class: a function for
+  the code of every state and transition and an `hsmd.Machine` declaration
+  of the structure, so it runs without the diagram files and without
+  `CyberiadaML`, the path of the diagram is a comment; the standard
+  semantics apply (hierarchy, history, deferred and propagated events,
+  submachine states, several machines);
 - the test diagrams are CyberiadaML, except the yEd `term_node`; the
   former `not-implemented` cases `if_else` and `value_signals` run;
 - the `SM Constructor Arguments` comment (synonym `Arguments`) declares the
@@ -24,8 +25,10 @@ Added:
 - the `vacuum` example of the whole language;
 - the guide to the comments of a diagram (`docs/COMMENTS.md`) and the
   `formal_comments` test of the formal form;
-- the `embedding` test (a program runs without the diagram files) and the
-  `external` test diagram (a machine of another document);
+- the `standalone` test (a program runs without the diagram files and
+  without `CyberiadaML`, an error names the element and the line) and the
+  `external` (a machine of another document) and `code_layout` test
+  diagrams;
 - the tests take the modules of this repository before their installed
   copies, and stop on a dispatcher older than the generator needs
   (`test/testenv.py`);

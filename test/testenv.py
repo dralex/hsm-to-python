@@ -30,8 +30,8 @@ import sys
 
 REPOSITORY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DISPATCHER = os.path.join(os.path.dirname(REPOSITORY), 'hsm-dispatcher-py')
-# the dispatcher function the generated programs depend on
-DISPATCHER_API = 'read_documents'
+# the dispatcher class the generated programs depend on
+DISPATCHER_API = 'Machine'
 
 PATHS = [REPOSITORY]
 if importlib.util.find_spec('hsmd') is None and os.path.isdir(DISPATCHER):

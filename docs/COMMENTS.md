@@ -1,6 +1,6 @@
 # The Comments of an HSM-to-Python Diagram
 
-Document version: 0.2 (2026-10-15)
+Document version: 0.3 (2026-10-15)
 
 This guide is for the authors of the diagrams run with `hsm-run`, `hsm-gencode` or the
 editor plugin. The states and the transitions carry the action text; the comments carry
@@ -14,21 +14,24 @@ of the dispatcher (`hsm-dispatcher-py/docs/ARCHITECTURE.md`).
  the diagram                                 the generated program
  ─────────────────────────────────           ─────────────────────────────────────────
  its path               ──────────────────▶  the header comment only
-                                             imports, DISPATCH(), DIAGRAM, MAIN, TICK_LEN
+                                             imports, DISPATCH(), TICK_LEN
  Arguments              ──────────────────▶  the arguments as globals (--set, --settings)
  Global Initialization  ──────────────────▶  module code, run once
  Init Scripts: a.py b.py ─────────────────▶  a.py, b.py inlined, in this order
- the states, the transitions, the comments,
- the referenced documents ────────────────▶  DOCUMENTS = {...}: the texts, embedded
- CGML_COMPONENT <id> ──┐                     dispatcher = hsmd.Dispatcher(DIAGRAM, documents=DOCUMENTS)
- CGML_META ────────────┴──▶ the dispatcher       the components are built here
+ the code of the states
+ and the transitions    ──────────────────▶  def Idle_entry(): ...   one function a block
+ the states, the transitions ─────────────▶  machine = hsmd.Machine(...)
+ CGML_COMPONENT <id>    ──────────────────▶      hsmd.Declaration(...) in the machine
+ CGML_META order, propagation ────────────▶      Machine(transition_order=, propagate=)
+                                             dispatcher = hsmd.Dispatcher(machine, ...)
+                                                 the components are built here
                                              main():
                                                  start, post INIT
                                                  while the machine is not finished:
  Loop                   ──────────────────▶          the loop code
                                                      TIME_TICK, TIME_TICK_1S, tick()
                                                      sleep TICK_LEN
- any other comment      ──▶ kept, not interpreted
+ any other comment      ──▶ not in the program
 ```
 
 `Arguments`, `Global Initialization`, `Init Scripts` and `Loop` are the convention
@@ -171,8 +174,9 @@ if iteration in SCRIPT:
 
 **The loop code is the body of a function, not the module code.** To assign a global it
 needs `global name`; without it the assignment makes a local name and the program fails
-with `UnboundLocalError`. The action text of the states and the transitions does not need
-`global`. `DISPATCH()` and `dispatcher` are available.
+with `UnboundLocalError`. The code of the states and the transitions does not need
+`global`: the generator declares the names it assigns. `DISPATCH()` and `dispatcher` are
+available.
 
 ## The formal comments of the dispatcher
 
@@ -204,9 +208,10 @@ plugin sets it before a run.
 
 ## Other comments
 
-Any other formal comment and any informal comment without a key is kept and not
-interpreted: notes, prompts, settings of other tools. An application running the diagram
-on the dispatcher reads them with `dispatcher.comments(machine, formal=True|False|None)`.
+Any other formal comment and any informal comment without a key is not interpreted and
+is not a part of the generated program: notes, prompts, settings of other tools. An
+application that loads the diagram on the dispatcher reads them with
+`dispatcher.comments(machine, formal=True|False|None)`.
 
 ## In the editor
 

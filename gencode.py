@@ -45,6 +45,12 @@ TITLES = {SECTION_INIT: 'Global initialization', SECTION_SCRIPTS: 'Init scripts'
 
 SCRIPT_EXTENSION = '.py'
 INDENT = ' ' * 4
+LINE_LENGTH = 99
+# the names of the unnamed vertices in the names of the functions
+LABELS = {'shallow': 'history', 'deep': 'history'}
+# the declarations of the pseudostates
+PSEUDOSTATES = {'initial': 'Initial', 'final': 'Final', 'terminate': 'Terminate',
+                'choice': 'Choice', 'shallow': 'History', 'deep': 'History'}
 STANDARD_TYPES = ('Timer', 'Log')       # the component types of the dispatcher
 
 LINT_HEADER = '''import ast  # pylint: disable=unused-import
@@ -116,12 +122,7 @@ def _set_arguments(defaults):
 '''
 
 FOOTER = '''
-# The diagram: the states, the transitions and their code
-DOCUMENTS = {{
-{documents}}}
-
-dispatcher = hsmd.Dispatcher(DIAGRAM, machines=[MAIN], namespace=globals(),
-                             documents=DOCUMENTS)
+dispatcher = hsmd.Dispatcher(machine, namespace=globals())
 
 
 def main():
@@ -180,21 +181,84 @@ def identifier(text):
     return re.sub(r'\W', '_', text)
 
 
-def text_literal(text):
-    """The text as a readable triple-quoted literal: only the backslashes,
-    the carriage returns and the quotes that would close it are escaped."""
-    chars = []
-    quotes = 0                          # the unescaped quotes in a row
-    for index, char in enumerate(text):
-        if char == '\\':
-            char = '\\\\'
-        elif char == '\r':
-            char = '\\r'
-        elif char == "'" and (quotes == 2 or index == len(text) - 1):
-            char = "\\'"
-        quotes = quotes + 1 if char == "'" else 0
-        chars.append(char)
-    return "'''" + ''.join(chars) + "'''"
+def python_name(text):
+    """An identifier made of the text: the name of an element, an event."""
+    name = re.sub(r'\W+', '_', text).strip('_') or 'x'
+    return '_' + name if name[0].isdigit() else name
+
+
+def indented(text, indent, mode='exec'):
+    """The lines of the code indented; the continuation lines of its string
+    literals keep their text."""
+    keep = set()
+    for node in ast.walk(ast.parse(text, mode=mode)):
+        if isinstance(node, ast.JoinedStr) or (isinstance(node, ast.Constant) and
+                                               isinstance(node.value, (str, bytes))):
+            keep.update(range(node.lineno + 1, node.end_lineno + 1))
+    return [indent + line if line.strip() and number not in keep else line
+            for number, line in enumerate(text.split('\n'), 1)]
+
+
+def function_lines(name, text, where, guard=False):
+    """The function of a piece of the diagram's code: the names the code
+    assigns are globals, as when it runs at the module level; a guard returns
+    its value."""
+    text = text.rstrip()
+    try:
+        tree = ast.parse(text.strip() if guard else text, mode='eval' if guard else 'exec')
+    except SyntaxError as e:
+        raise GeneratorError('{}, line {}: {}'.format(where, e.lineno, e.msg)) from None
+    lines = ['def {}():'.format(name)]
+    if guard:
+        text = text.strip()
+        if '\n' in text:
+            return lines + [INDENT + 'return ('] + indented(text, INDENT * 2, 'eval') + [INDENT + ')']
+        return lines + [INDENT + 'return ' + text]
+    declared = {n for node in tree.body if isinstance(node, ast.Global) for n in node.names}
+    names = sorted(assigned_names(tree) - declared)
+    if names:
+        lines.append(INDENT + 'global ' + ', '.join(names))
+    lines += indented(text, INDENT)
+    if not tree.body:
+        lines.append(INDENT + 'pass')
+    try:
+        compile('\n'.join(lines), where, 'exec')
+    except SyntaxError as e:
+        raise GeneratorError('{}: {}'.format(where, e.msg)) from None
+    return lines
+
+
+def wrapped(indent, call, args, end):
+    """call(args)end on one line, or the arguments wrapped under the
+    parenthesis to keep the lines within LINE_LENGTH, the end included."""
+    line = '{}{}({}){}'.format(indent, call, ', '.join(args), end)
+    if len(line) <= LINE_LENGTH or len(args) < 2:
+        return [line]
+    head = indent + call + '('
+    hanging = ' ' * len(head)
+    rows = [[args[0]]]
+    for arg in args[1:]:
+        start = head if len(rows) == 1 else hanging
+        if len(start + ', '.join(rows[-1] + [arg])) + 1 <= LINE_LENGTH:
+            rows[-1].append(arg)
+        else:
+            rows.append([arg])
+    while len(rows[-1]) > 1 and len((head if len(rows) == 1 else hanging) +
+                                    ', '.join(rows[-1]) + ')' + end) > LINE_LENGTH:
+        rows.append([rows[-1].pop()])
+    return [(head if i == 0 else hanging) + ', '.join(row) +
+            (',' if i < len(rows) - 1 else ')' + end) for i, row in enumerate(rows)]
+
+
+def nested(indent, head, groups, end=','):
+    """A declaration with lists: head(..., key=[ items ], ...), one item a line."""
+    if not groups:
+        return [indent + head + ')' + end]
+    lines = []
+    for index, (key, items) in enumerate(groups):
+        lines.append((indent + head + ', ' if index == 0 else indent + '], ') + key + '=[')
+        lines += items
+    return lines + [indent + '])' + end]
 
 
 class Block:
@@ -258,6 +322,169 @@ def assigned_names(tree):
     return names
 
 
+class MachineCode:
+    """The Python code of a machine: the functions of its blocks and the
+    declarations of its structure."""
+
+    def __init__(self, machine, taken):
+        self.machine = machine
+        self.taken = set(taken)      # the names the program defines already
+        self.functions = []
+
+    def function(self, base, text, where, guard=False):
+        """A new function holding the text; return its name."""
+        name = base = python_name(base)
+        number = 1
+        while name in self.taken:
+            number += 1
+            name = '{}_{}'.format(base, number)
+        self.taken.add(name)
+        self.functions.extend([''] * 2 + function_lines(name, text, where, guard))
+        return name
+
+    @staticmethod
+    def label(vertex):
+        """The name of a vertex in the names of the functions."""
+        return vertex.name or LABELS.get(vertex.kind, vertex.kind)
+
+    def reaction_args(self, reaction, base):
+        """The guard, the action and the flags of a transition, as arguments."""
+        args = []
+        if reaction.is_else():
+            args.append('guard=hsmd.ELSE')
+        elif reaction.guard:
+            args.append('guard=' + self.function(base + '_guard', reaction.guard,
+                                                 reaction.where + ', guard', True))
+        if reaction.behavior.strip():
+            args.append('action=' + self.function(base, reaction.behavior, reaction.where))
+        if reaction.propagation is not None:
+            args.append('propagate={}'.format(reaction.propagation))
+        if reaction.defer:
+            args.append('defer=True')
+        return args
+
+    def pieces(self, vertex, kind, blocks):
+        """entry= or exit= of a state: one function or a list."""
+        names = [self.function('{}_{}'.format(self.label(vertex), kind), b.text, b.where)
+                 for b in blocks if b.text.strip()]
+        if not names:
+            return []
+        return ['{}={}'.format(kind, names[0] if len(names) == 1 else
+                               '[' + ', '.join(names) + ']')]
+
+    def state(self, vertex, depth):
+        """hsmd.State(...) with its internal transitions and its states."""
+        indent = INDENT * depth
+        args = [repr(vertex.name)]
+        if vertex.id != vertex.name:
+            args.append('id={!r}'.format(vertex.id))
+        args += self.pieces(vertex, 'entry', vertex.entry) + self.pieces(vertex, 'exit', vertex.exit)
+        internal = []
+        for reaction in vertex.reactions:
+            if reaction.target is None:
+                base = '{}_{}'.format(self.label(vertex), reaction.trigger)
+                internal += wrapped(indent + INDENT, 'hsmd.On',
+                                    [repr(reaction.trigger)] + self.reaction_args(reaction, base),
+                                    ',')
+        children = []
+        for child in vertex.children:
+            children += self.vertex(child, vertex, depth + 1)
+        groups = [g for g in (('internal', internal), ('states', children)) if g[1]]
+        return nested(indent, 'hsmd.State(' + ', '.join(args), groups)
+
+    @staticmethod
+    def pseudostate(vertex, parent, depth):
+        """hsmd.Initial(...), hsmd.EntryPoint(...) and the like."""
+        if vertex.kind in (hsmd_reader.ENTRY, hsmd_reader.EXIT):
+            cls = 'EntryPoint' if vertex.kind == hsmd_reader.ENTRY else 'ExitPoint'
+            args = [repr(vertex.name)]
+            default = '{}.{}'.format(parent.id, vertex.name)
+        else:
+            cls = PSEUDOSTATES[vertex.kind]
+            args = []
+            default = '{}.{}'.format(parent.id, vertex.kind)
+        if vertex.id != default:
+            args.append('id={!r}'.format(vertex.id))
+        if vertex.kind == hsmd_reader.CHOICE and vertex.name:
+            args.append('name={!r}'.format(vertex.name))
+        if vertex.kind == hsmd_reader.DEEP:
+            args.append('deep=True')
+        return [INDENT * depth + 'hsmd.{}({}),'.format(cls, ', '.join(args))]
+
+    def vertex(self, vertex, parent, depth):
+        """The declaration of a vertex, as lines."""
+        if vertex.kind in (hsmd_reader.STATE, hsmd_reader.COMPOSITE):
+            return self.state(vertex, depth)
+        return self.pseudostate(vertex, parent, depth)
+
+    def transitions(self):
+        """The declarations of the transitions, in the order of their sources."""
+        lines = []
+        used = set()
+        for vertex in self.machine.vertices.values():
+            for reaction in vertex.reactions:
+                if reaction.target is not None:
+                    lines += self.transition(reaction, used)
+        return lines
+
+    def transition(self, reaction, used):
+        """hsmd.Transition(...); the identifier only when not the default one."""
+        source, target = reaction.source, reaction.target
+        # the identifier the declaration gives: <source>-<target>, #<n> from the second
+        ends = '{}-{}'.format(source.id, target.id)
+        default, number = ends, 1
+        while default in used:
+            number += 1
+            default = '{}#{}'.format(ends, number)
+        used.add(reaction.id)
+        base = '{}_to_{}'.format(self.label(source), self.label(target))
+        args = [repr(source.id), repr(target.id)]
+        if reaction.trigger:
+            base = '{}_{}_to_{}'.format(self.label(source), reaction.trigger, self.label(target))
+            args.append(repr(reaction.trigger))
+        args += self.reaction_args(reaction, base)
+        if reaction.id != default:
+            args.append('id={!r}'.format(reaction.id))
+        end = ','
+        if (source.id, target.id) != (self.label(source), self.label(target)):
+            end += '  # {} -> {}'.format(self.label(source), self.label(target))
+        return wrapped(INDENT, 'hsmd.Transition', args, end)
+
+    def components(self):
+        """The declarations of the components."""
+        lines = []
+        for declaration in self.machine.components:
+            args = [repr(declaration.id), repr(declaration.type)]
+            if declaration.priority is not None:
+                args.append('priority={}'.format(declaration.priority))
+            if declaration.shared is not None:
+                args.append('shared={}'.format(declaration.shared))
+            plain = {k: v for k, v in declaration.parameters.items() if k.isidentifier()}
+            args += ['{}={!r}'.format(k, v) for k, v in plain.items()]
+            other = {k: v for k, v in declaration.parameters.items() if k not in plain}
+            if other:
+                args.append('**{!r}'.format(other))
+            lines += wrapped(INDENT, 'hsmd.Declaration', args, ',')
+        return lines
+
+    def declarations(self):
+        """machine = hsmd.Machine(...), as lines."""
+        machine = self.machine
+        states = []
+        for child in machine.root.children:
+            states += self.vertex(child, machine.root, 1)
+        head = ['{!r}'.format(machine.name)]
+        if machine.id != machine.name:
+            head.append('id={!r}'.format(machine.id))
+        if machine.transition_order == hsmd_reader.EXIT_FIRST:
+            head.append('transition_order={!r}'.format(machine.transition_order))
+        if machine.propagate:
+            head.append('propagate=True')
+        groups = [g for g in (('states', states), ('transitions', self.transitions()),
+                              ('components', self.components())) if g[1]]
+        return nested('', 'machine = hsmd.Machine(' + ', '.join(head), groups, end='')
+
+
 class CodeGenerator:
 
     def __init__(self, graph_file, main=None, tick_len=TICK_LEN):
@@ -265,8 +492,6 @@ class CodeGenerator:
         self.tick_len = tick_len
         try:
             self.machines = hsmd_reader.load(graph_file)
-            # the program carries the diagram and the documents it references
-            self.documents = hsmd_reader.read_documents(graph_file)
         except hsmd_reader.DocumentError as e:
             raise ParserError(str(e)) from e
         self.machine = self.__select(self.machines, main)
@@ -345,10 +570,7 @@ class CodeGenerator:
                  '# Generated by HSM-to-Python version {}{}'.format(
                      VERSION, '; not for running' if lint else ''), '']
         lines += (LINT_HEADER if lint else HEADER).split('\n')
-        lines += ['DIAGRAM = {!r}  # the name of the diagram in DOCUMENTS'.format(
-                      next(iter(self.documents))),
-                  'MAIN = {!r}'.format(self.machine.id),
-                  'TICK_LEN = {}                 # the period of TIME_TICK, ms'.format(
+        lines += ['TICK_LEN = {}                 # the period of TIME_TICK, ms'.format(
                       self.tick_len)]
         lines += ['', '# Arguments:']
         if lint:
@@ -375,21 +597,38 @@ class CodeGenerator:
         """Write the program to the file, or to the standard output."""
         lines = self.__preamble()
         self.__sections(lines, lambda title, index: None)
-        loop = ''.join(INDENT * 2 + line + '\n' if line.strip() else '\n'
-                       for line in self.__lines(SECTION_LOOP))
-        text = '\n'.join(lines) + '\n' + FOOTER.format(loop=loop,
-                                                       documents=self.__documents())
+        functions, declarations = self.__machine_code()
+        if functions:
+            lines += ['', '', '# The code of the states and the transitions:'] + functions
+        lines += ['', '', '# The state machine:', ''] + declarations
+        loop = '\n'.join(indented('\n'.join(self.__lines(SECTION_LOOP)), INDENT * 2))
+        loop = loop + '\n' if loop.strip() else ''
+        text = '\n'.join(lines) + '\n' + FOOTER.format(loop=loop)
         self.__write(target, text)
 
-    def __documents(self):
-        """The entries of DOCUMENTS: the texts as readable literals."""
-        entries = ''
-        for name, text in self.documents.items():
-            literal = text_literal(text)
-            if ast.literal_eval(literal) != text:
-                raise GeneratorError('Cannot embed the document {}'.format(name))
-            entries += '{}{!r}: {},\n'.format(INDENT, name, literal)
-        return entries
+    # ------------------------------------------------------------------------
+    # the code of the machine
+
+    def __machine_code(self):
+        """The functions of the diagram's code and the declarations of the
+        machine, as lines."""
+        code = MachineCode(self.machine, self.defined_names())
+        declarations = code.declarations()
+        return code.functions, declarations
+
+    def defined_names(self):
+        """The names the program defines before the diagram's code: the
+        program's own, the arguments, the components and the names of the
+        initialization code and of the init scripts."""
+        defined = set(self.arguments) | {'dispatcher', 'machine', 'main', 'event', 'DISPATCH',
+                                         'TICK_LEN', 'hsmd', 'sys', 'time', 'ast'}
+        defined |= {d.id for d in self.machine.components}
+        for text in [self.__lines(SECTION_INIT)] + [s.split('\n') for _, s in self.__scripts()]:
+            try:
+                defined |= assigned_names(ast.parse('\n'.join(text)))
+            except SyntaxError:
+                pass
+        return defined
 
     @staticmethod
     def __write(target, text):
@@ -444,14 +683,7 @@ class CodeGenerator:
                 ctype = 'hsmd.' + ctype
             lines.append('{} = {}({!r}, None)'.format(declaration.id, ctype, declaration.id))
         # the names the program defines, so a block's new global gets a definition
-        defined = set(self.arguments) | {'dispatcher', 'event', 'DISPATCH', 'DIAGRAM',
-                                         'MAIN', 'TICK_LEN', 'hsmd', 'sys', 'time', 'ast'}
-        defined |= {d.id for d in self.machine.components}
-        for text in [self.__lines(SECTION_INIT)] + [s.split('\n') for _, s in self.__scripts()]:
-            try:
-                defined |= assigned_names(ast.parse('\n'.join(text)))
-            except SyntaxError:
-                pass
+        defined = self.defined_names()
         blocks = self.blocks()
         errors = []
         bodies = []
@@ -467,13 +699,15 @@ class CodeGenerator:
                 body = ['return ' + code]
             else:
                 try:
-                    names = assigned_names(ast.parse(block.text))
+                    tree = ast.parse(block.text)
                 except SyntaxError as e:
                     errors.append((block, e))
                     names = set()
                     body = ['pass  # a syntax error, see the findings']
                 else:
-                    body = block.text.split('\n') or ['pass']
+                    names = assigned_names(tree)
+                    # a block of comments only still needs a statement
+                    body = block.text.split('\n') + ([] if tree.body else ['pass'])
             for name in sorted(names - defined):
                 created.setdefault(name, block.where)
             bodies.append((block, sorted(names), body))
