@@ -55,8 +55,8 @@ Checks of the installation, from this repository:
     hsm-run test/graphs/term_node.graphml     # INIT, ENTRY A, ENTRY B, TERM
     CyberiadaEditor --batch --list-plugins    # hsm-to-python ... enabled
 
-A generated program needs, where it runs, the diagram file at the place it
-had when it was generated, the `hsmd` module and the `CyberiadaML` module.
+A generated program carries its diagram and needs, where it runs, the
+`hsmd` module and the `CyberiadaML` module.
 The scripts of the repository run without installation too (`./hsm.py`,
 `./gencode.py`, `./hsmcheck.py`) when `hsmd` is importable.
 
@@ -75,9 +75,11 @@ the diagram, see below) and `--keep` (leave the generated program in place
 and tell where). `hsm-gencode --check` refuses a diagram with errors, and
 `hsm-gencode --lint out.py` writes the lint view instead of the program.
 
-The generated program needs the diagram file at the place it had when it was
-generated, the `hsmd` module and the `CyberiadaML` module. It takes `--set`,
-`--settings` and `--help` itself.
+The generated program carries the diagram and the documents its submachine
+states reference (`DOCUMENTS`), so it runs without the diagram files; the
+path of the diagram stays in its header comment. It needs the `hsmd` module
+and the `CyberiadaML` module, and takes `--set`, `--settings` and `--help`
+itself.
 
 ### The diagram
 
@@ -185,6 +187,7 @@ none and saves the diagram before the run. To try it from the repository, with
     cd test
     python3 python_hsm_test.py      # the diagrams, their code check, the lint tests
     python3 arguments_test.py       # --set, --settings, --help of a generated program
+    python3 embedding_test.py       # a generated program runs without the diagram files
     python3 plugin_test.py          # the editor plugin in the batch mode of the editor
 
 Each test is a diagram `test/graphs/<name>.graphml` with the expected output
@@ -198,7 +201,8 @@ vacuum cleaner, is the full example: two machines with a submachine state,
 history, deferred and propagated events, a choice, event parameters, a
 component defined in the init script `vacuum_battery.py`, and every
 convention comment; `formal_comments.graphml` writes them as formal comments
-and keeps the comments that must be ignored. The plugin test needs the editor binary
+and keeps the comments that must be ignored; `external.graphml` runs a machine
+of the document `lib/worker.graphml`. The plugin test needs the editor binary
 (`CYBERIADA_EDITOR`, the `PATH`, or the sibling build) and the installed
 commands; it says when it skips. When the dispatcher is not installed, the
 tests take it from `../hsm-dispatcher-py` beside this repository.

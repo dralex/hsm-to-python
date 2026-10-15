@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dName" for="graph" attr.name="name" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine" attr.type="string"/>
+  <key id="dSubmachineState" for="node" attr.name="submachineState" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <graph id="G" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">Host</data>
+    <node id="nMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0</data>
+    </node>
+    <node id="nInit">
+      <data key="dNote">formal</data>
+      <data key="dName">Global Initialization</data>
+      <data key="dData">debug = print</data>
+    </node>
+    <node id="init">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="job">
+      <data key="dSubmachineState">lib/worker.graphml#W</data>
+      <data key="dName">Job</data>
+      <graph id="job:" edgedefault="directed">
+        <node id="job::en">
+          <data key="dVertex">entryPoint</data>
+          <data key="dName">Start</data>
+        </node>
+        <node id="job::ex">
+          <data key="dVertex">exitPoint</data>
+          <data key="dName">Done</data>
+        </node>
+      </graph>
+    </node>
+    <node id="fin">
+      <data key="dVertex">final</data>
+    </node>
+    <edge id="init-job" source="init" target="job::en"/>
+    <edge id="job-fin" source="job::ex" target="fin">
+      <data key="dData">/
+debug('finished')</data>
+    </edge>
+  </graph>
+</graphml>

@@ -4,9 +4,11 @@
 
 Changed:
 - the generated program runs the diagram on the HSM dispatcher
-  (`hsm-dispatcher-py`) instead of a generated pysm class: the diagram is
-  loaded at run time, the standard semantics apply (hierarchy, history,
-  deferred and propagated events, submachine states, several machines);
+  (`hsm-dispatcher-py`) instead of a generated pysm class: the program
+  carries the diagram and the documents its submachine states reference
+  (`DOCUMENTS`) and runs without the files, the path of the diagram is a
+  comment; the standard semantics apply (hierarchy, history, deferred and
+  propagated events, submachine states, several machines);
 - the test diagrams are CyberiadaML, except the yEd `term_node`; the
   former `not-implemented` cases `if_else` and `value_signals` run;
 - the `SM Constructor Arguments` comment (synonym `Arguments`) declares the
@@ -22,6 +24,8 @@ Added:
 - the `vacuum` example of the whole language;
 - the guide to the comments of a diagram (`docs/COMMENTS.md`) and the
   `formal_comments` test of the formal form;
+- the `embedding` test (a program runs without the diagram files) and the
+  `external` test diagram (a machine of another document);
 - the plugin of the Cyberiada State Machine Editor (check, generate, run)
   and `hsm-run --install-editor-plugin`;
 - the pip installation and the Debian package.

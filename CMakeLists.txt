@@ -54,6 +54,9 @@ if(Python3_FOUND)
   add_test(NAME arguments
            COMMAND ${Python3_EXECUTABLE} -B arguments_test.py
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+  add_test(NAME embedding
+           COMMAND ${Python3_EXECUTABLE} -B embedding_test.py
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
   add_test(NAME plugin
            COMMAND ${Python3_EXECUTABLE} -B plugin_test.py
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)

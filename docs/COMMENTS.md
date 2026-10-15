@@ -1,6 +1,6 @@
 # The Comments of an HSM-to-Python Diagram
 
-Document version: 0.1 (2026-10-15)
+Document version: 0.2 (2026-10-15)
 
 This guide is for the authors of the diagrams run with `hsm-run`, `hsm-gencode` or the
 editor plugin. The states and the transitions carry the action text; the comments carry
@@ -13,11 +13,14 @@ of the dispatcher (`hsm-dispatcher-py/docs/ARCHITECTURE.md`).
 ```
  the diagram                                 the generated program
  ─────────────────────────────────           ─────────────────────────────────────────
+ its path               ──────────────────▶  the header comment only
                                              imports, DISPATCH(), DIAGRAM, MAIN, TICK_LEN
  Arguments              ──────────────────▶  the arguments as globals (--set, --settings)
  Global Initialization  ──────────────────▶  module code, run once
  Init Scripts: a.py b.py ─────────────────▶  a.py, b.py inlined, in this order
- CGML_COMPONENT <id> ──┐                     dispatcher = hsmd.Dispatcher(...)
+ the states, the transitions, the comments,
+ the referenced documents ────────────────▶  DOCUMENTS = {...}: the texts, embedded
+ CGML_COMPONENT <id> ──┐                     dispatcher = hsmd.Dispatcher(DIAGRAM, documents=DOCUMENTS)
  CGML_META ────────────┴──▶ the dispatcher       the components are built here
                                              main():
                                                  start, post INIT
