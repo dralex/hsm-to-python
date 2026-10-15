@@ -34,12 +34,10 @@ PLUGIN = 'hsm-to-python'
 
 
 def editor():
-    """The editor binary: CYBERIADA_EDITOR, the sibling build (the matching
-    version), or PATH."""
-    candidates = [os.environ.get('CYBERIADA_EDITOR'),
+    """The editor binary: CYBERIADA_EDITOR, PATH, or the sibling build."""
+    candidates = [os.environ.get('CYBERIADA_EDITOR'), shutil.which('CyberiadaEditor'),
                   os.path.join(REPOSITORY, '..', 'CyberiadaHSM-Editor', 'build',
-                               'CyberiadaEditor'),
-                  shutil.which('CyberiadaEditor')]
+                               'CyberiadaEditor')]
     for path in candidates:
         if path and os.path.isfile(path) and os.access(path, os.X_OK):
             return path

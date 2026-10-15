@@ -26,8 +26,9 @@ Added:
   `formal_comments` test of the formal form;
 - the `embedding` test (a program runs without the diagram files) and the
   `external` test diagram (a machine of another document);
-- the tests take this repository, the dispatcher beside it and the sibling
-  editor build before the installed packages (`test/testenv.py`);
+- the tests take the modules of this repository before their installed
+  copies, and stop on a dispatcher older than the generator needs
+  (`test/testenv.py`);
 - the plugin of the Cyberiada State Machine Editor (check, generate, run)
   and `hsm-run --install-editor-plugin`;
 - the pip installation and the Debian package.

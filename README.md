@@ -203,13 +203,14 @@ component defined in the init script `vacuum_battery.py`, and every
 convention comment; `formal_comments.graphml` writes them as formal comments
 and keeps the comments that must be ignored; `external.graphml` runs a machine
 of the document `lib/worker.graphml`. The plugin test needs the editor binary
-(`CYBERIADA_EDITOR`, the sibling build `../CyberiadaHSM-Editor/build`, or the
-`PATH`, in this order), prints the one it uses and says when it skips.
+(`CYBERIADA_EDITOR`, the `PATH`, or the sibling build), prints the one it uses
+and says when it skips.
 
-The tests take the working copies before the installed packages
-(`test/testenv.py`): the modules of this repository, then the dispatcher
-`../hsm-dispatcher-py` beside it when it is there; `python_hsm_test.py`
-prints the generator and the dispatcher under test.
+The tests take the modules of this repository before their installed copies
+(`test/testenv.py`). The dispatcher is the installed one, or
+`../hsm-dispatcher-py` beside this repository when none is installed; a
+dispatcher older than the generator needs stops the tests with a message.
+`python_hsm_test.py` prints the generator and the dispatcher under test.
 
 ## Requirements
 
