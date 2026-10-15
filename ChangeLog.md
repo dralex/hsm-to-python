@@ -34,6 +34,12 @@ Added:
   and `hsm-run --install-editor-plugin`;
 - the pip installation and the Debian package.
 
+Fixed:
+- `hsm-run` runs the program unbuffered: its output reaches a pipe (the
+  editor's output tab) line by line and is not lost when the timeout kills
+  it; a SIGTERM to `hsm-run` (the editor's Cancel) stops the program too;
+  the plugin's run stopped by its time limit is no failure.
+
 Removed:
 - the dependency on `pysm`; `DISPATCH_VALUE` and `DISPATCH_SM`.
 

@@ -22,6 +22,7 @@
 #  -----------------------------------------------------------------------------
 
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -50,6 +51,21 @@ def install_plugin():
     return 0
 
 
+def run_program(command, timeout):
+    """Run the program until it ends, the timeout (subprocess.TimeoutExpired) or a SIGTERM
+    to the runner, which the editor's Cancel sends to the runner only."""
+    with subprocess.Popen(command) as process:
+        previous = signal.signal(signal.SIGTERM, lambda signum, frame: process.terminate())
+        try:
+            return process.wait(timeout=timeout or None)
+        except BaseException:
+            # the with waits for it
+            process.kill()
+            raise
+        finally:
+            signal.signal(signal.SIGTERM, previous)
+
+
 def run():
     if '--install-editor-plugin' in sys.argv:
         return install_plugin()
@@ -76,7 +92,8 @@ def run():
         return EXIT_PARSER
     with tempfile.NamedTemporaryFile(prefix='hsm-', suffix='.py', delete=False) as program:
         path = program.name
-    command = [sys.executable, path]
+    # unbuffered: the output reaches a pipe line by line and survives a kill
+    command = [sys.executable, '-u', path]
     for pair in args.set:
         command += ['--set', pair]
     if args.settings:
@@ -85,8 +102,7 @@ def run():
         generator.generate_code(path)
         if args.keep:
             sys.stderr.write('The program is kept in {}\n'.format(path))
-        return subprocess.run(command, check=False,
-                              timeout=args.timeout or None).returncode
+        return run_program(command, args.timeout)
     except gencode.GeneratorError as e:
         sys.stderr.write('Code generating error: {}\n'.format(e))
         return EXIT_GENERATOR

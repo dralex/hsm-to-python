@@ -14,5 +14,5 @@
   "Generate the program...": "Сгенерировать программу...",
   "Write the Python program of the diagram into the directory": "Записать программу на Python по диаграмме в каталог",
   "Run the diagram...": "Запустить диаграмму...",
-  "Run the diagram on the dispatcher; the output goes to the Output tab": "Запустить диаграмму на диспетчере; вывод попадает во вкладку «Вывод»"
+  "Run the diagram on the dispatcher; its output streams into the plugin's output tab": "Запустить диаграмму на диспетчере; её вывод появляется во вкладке вывода плагина"
 }

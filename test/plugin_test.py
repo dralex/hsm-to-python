@@ -124,7 +124,7 @@ def main():
     # the actions save the document after filling its platform language: copies,
     # with the Python files the diagrams import
     with tempfile.TemporaryDirectory() as directory:
-        for folder in ('graphs', 'lint'):
+        for folder in ('graphs', 'lint', 'runner'):
             shutil.copytree(os.path.join(REPOSITORY, 'test', folder), os.path.join(directory, folder))
         vacuum = os.path.join(directory, 'graphs', 'vacuum.graphml')
         bad = os.path.join(directory, 'lint', 'bad.graphml')
@@ -160,6 +160,16 @@ def main():
             failed += 1
         else:
             print('ok   generate')
+        # the output of an endless program comes, its time limit is no failure
+        forever = os.path.join(directory, 'runner', 'forever.graphml')
+        code, out = batch(binary, forever, '--plugin-path', '.',
+                          '--run-plugin', PLUGIN + ':run', '--plugin-param', 'timeout=3',
+                          '--dump-plugin')
+        if code != 0 or 'state: done' not in out or '  RUNNING' not in out or '  TICK' not in out:
+            print('FAIL run: exit {}\n{}'.format(code, out))
+            failed += 1
+        else:
+            print('ok   run')
     return 1 if failed else 0
 
 

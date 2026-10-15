@@ -128,9 +128,13 @@
         "platformLanguage": "Python"
       },
       "timeout": 0,
+      "exit_ok": [
+        0,
+        4
+      ],
       "icon": "icons/run.svg",
       "toolbar": true,
-      "description": "Run the diagram on the dispatcher; the output goes to the Output tab",
+      "description": "Run the diagram on the dispatcher; its output streams into the plugin's output tab",
       "argv": [
         "-m",
         "hsm",

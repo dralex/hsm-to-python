@@ -60,6 +60,9 @@ if(Python3_FOUND)
   add_test(NAME plugin
            COMMAND ${Python3_EXECUTABLE} -B plugin_test.py
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+  add_test(NAME runner
+           COMMAND ${Python3_EXECUTABLE} -B runner_test.py
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
 endif()
 
 configure_file("${PROJECT_SOURCE_DIR}/HsmToPythonPackOptions.cmake.in"

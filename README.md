@@ -74,6 +74,9 @@ after S seconds), `--set NAME=VALUE` and `--settings FILE` (the arguments of
 the diagram, see below) and `--keep` (leave the generated program in place
 and tell where). `hsm-gencode --check` refuses a diagram with errors, and
 `hsm-gencode --lint out.py` writes the lint view instead of the program.
+`hsm-run` runs the program unbuffered, so its output comes line by line into
+a pipe too; the timeout and a SIGTERM to `hsm-run` stop the program as well
+(on Windows a killed `hsm-run` leaves the program running).
 
 The generated program carries the diagram and the documents its submachine
 states reference (`DOCUMENTS`), so it runs without the diagram files; the
@@ -168,8 +171,9 @@ defined at module level.
 `editor-plugin/` holds the plugin for CyberiadaPro (its plugin
 interface, level 1): the actions *Check the code* (the findings appear on
 the elements), *Generate the program...* (into a chosen directory) and *Run
-the diagram...* (the output in the plugin dock, a time limit, the arguments
-as `name = value` lines). Install the directory as `hsm-to-python/` into the
+the diagram...* (the output streams into the plugin's output tab; the time
+limit, no failure, and Cancel stop the program; the arguments as `name =
+value` lines). Install the directory as `hsm-to-python/` into the
 editor's plugin folder: the Debian package does it, `hsm-run
 --install-editor-plugin` does it for a pip installation (see Installation,
 and the editor's `docs/PLUGIN-API.md`, Packaging). The plugin runs the
