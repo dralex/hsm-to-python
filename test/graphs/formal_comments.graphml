@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dName" for="graph" attr.name="name" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <graph id="G" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">counter</data>
+    <node id="nMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+name/ formal comments
+
+platformLanguage/ Python</data>
+    </node>
+    <node id="nArguments">
+      <data key="dNote">formal</data>
+      <data key="dName">Arguments</data>
+      <data key="dData"># the loop iterations before DONE
+limit = 3</data>
+    </node>
+    <node id="nInit">
+      <data key="dNote">formal</data>
+      <data key="dName">Global Initialization</data>
+      <data key="dData">debug = print
+ticks = 0
+
+def say(text):
+    debug('{}: {}'.format(ticks, text))
+
+say('INIT 1')</data>
+    </node>
+    <node id="nInit2">
+      <data key="dNote">formal</data>
+      <data key="dName">GLOBAL_INITIALIZATION:</data>
+      <data key="dData">say('INIT 2, limit {}'.format(limit))</data>
+    </node>
+    <node id="nUnnamed">
+      <data key="dNote">formal</data>
+      <data key="dData">Global Initialization
+say('UNNAMED FORMAL')</data>
+    </node>
+    <node id="nNamedInformal">
+      <data key="dNote">informal</data>
+      <data key="dName">Global Initialization</data>
+      <data key="dData">say('NAMED INFORMAL')</data>
+    </node>
+    <node id="nInitial">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="nRun">
+      <data key="dName">Run</data>
+      <data key="dData">entry/
+say('RUN')
+
+exit/
+say('EXIT RUN')</data>
+      <graph id="nRun:" edgedefault="directed">
+        <node id="nRunInitial">
+          <data key="dVertex">initial</data>
+        </node>
+        <node id="nCount">
+          <data key="dName">Count</data>
+          <data key="dData">entry/
+say('COUNT')</data>
+        </node>
+        <node id="nLoop">
+          <data key="dNote">formal</data>
+          <data key="dName">Loop</data>
+          <data key="dData">global ticks
+ticks += 1
+if ticks == limit:
+    DISPATCH('DONE', n=ticks)</data>
+        </node>
+      </graph>
+    </node>
+    <node id="nFinal">
+      <data key="dVertex">final</data>
+    </node>
+    <edge id="e0" source="nInitial" target="nRun"/>
+    <edge id="e2" source="nRunInitial" target="nCount"/>
+    <edge id="e1" source="nRun" target="nFinal">
+      <data key="dData">DONE/
+say('DONE {}'.format(event.n))</data>
+    </edge>
+  </graph>
+</graphml>

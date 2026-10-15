@@ -1,0 +1,6 @@
+0: INIT 1
+0: INIT 2, limit 3
+0: RUN
+0: COUNT
+3: DONE 3
+3: EXIT RUN
