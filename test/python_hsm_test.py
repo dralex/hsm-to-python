@@ -23,25 +23,17 @@ import os
 import subprocess
 import re
 
+import testenv  # pylint: disable=unused-import
+import hsmd  # pylint: disable=wrong-import-order
+import gencode
+import hsmcheck
+
 TESTS_DIR = 'graphs'
 TEST_PATTERN = re.compile(r'(?P<filebase>[^-]+)(-(?P<number>\d+))?.graphml$')
 TEST_GRAPHML_EXT = '.graphml'
 TEST_OUTPUT_EXT = '.txt'
 TMP_FILE = 'tmp.py'
 PYTHON_CMD = sys.executable
-# the dispatcher beside this repository, when it is not installed
-DISPATCHER_DIR = os.path.join('..', '..', 'hsm-dispatcher-py')
-
-sys.path.append('..')
-try:
-    import hsmd  # pylint: disable=unused-import
-except ImportError:
-    sys.path.append(DISPATCHER_DIR)
-    os.environ['PYTHONPATH'] = os.pathsep.join(
-        p for p in (os.environ.get('PYTHONPATH', ''), os.path.abspath(DISPATCHER_DIR)) if p)
-
-import gencode
-import hsmcheck
 
 LINT_DIR = 'lint'
 
@@ -125,6 +117,7 @@ def run_lint_tests():
 
 if __name__ == '__main__':
     verbose = len(sys.argv) > 1 and sys.argv[1] == '-v'
+    print('the generator {}, the dispatcher {}'.format(gencode.__file__, hsmd.__file__))
     tests = get_tests()
     run_tests(tests, verbose)
     os.remove(TMP_FILE)

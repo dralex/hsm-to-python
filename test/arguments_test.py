@@ -25,7 +25,7 @@ import subprocess
 import sys
 import tempfile
 
-sys.path.append('..')
+import testenv  # pylint: disable=unused-import
 import gencode  # pylint: disable=wrong-import-position
 
 DIAGRAM = os.path.join('graphs', 'vacuum.graphml')

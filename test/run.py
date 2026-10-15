@@ -22,7 +22,7 @@ import sys
 import os
 import subprocess
 
-sys.path.append('..')
+import testenv  # pylint: disable=unused-import
 import gencode
 
 PYTHON_CMD = sys.executable

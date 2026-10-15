@@ -27,20 +27,19 @@ import subprocess
 import sys
 import tempfile
 
-sys.path.append('..')
+from testenv import REPOSITORY
 import hsmplugin  # pylint: disable=wrong-import-position
 
 PLUGIN = 'hsm-to-python'
-REPOSITORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-# the dispatcher beside this repository, for the editor's Python
-DISPATCHER = os.path.join(REPOSITORY, '..', 'hsm-dispatcher-py')
 
 
 def editor():
-    """The editor binary: CYBERIADA_EDITOR, PATH, or the sibling build."""
-    candidates = [os.environ.get('CYBERIADA_EDITOR'), shutil.which('CyberiadaEditor'),
+    """The editor binary: CYBERIADA_EDITOR, the sibling build (the matching
+    version), or PATH."""
+    candidates = [os.environ.get('CYBERIADA_EDITOR'),
                   os.path.join(REPOSITORY, '..', 'CyberiadaHSM-Editor', 'build',
-                               'CyberiadaEditor')]
+                               'CyberiadaEditor'),
+                  shutil.which('CyberiadaEditor')]
     for path in candidates:
         if path and os.path.isfile(path) and os.access(path, os.X_OK):
             return path
@@ -49,8 +48,6 @@ def editor():
 
 def batch(binary, *args):
     env = dict(os.environ, QT_QPA_PLATFORM='offscreen')
-    paths = [os.path.abspath(REPOSITORY), os.path.abspath(DISPATCHER), env.get('PYTHONPATH', '')]
-    env['PYTHONPATH'] = os.pathsep.join(p for p in paths if p)
     result = subprocess.run([binary, '--batch'] + list(args), stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, universal_newlines=True, env=env,
                             cwd=REPOSITORY, check=False, timeout=120)
@@ -115,6 +112,7 @@ def main():
     if binary is None:
         print('skipped the editor part: no CyberiadaEditor binary')
         return 1 if failed else 0
+    print('editor: {}'.format(os.path.realpath(binary)))
     code, out = batch(binary, '--plugin-path', '.', '--list-plugins')
     if code != 0 or PLUGIN not in out or 'enabled' not in out:
         print('FAIL list: exit {}\n{}'.format(code, out))
@@ -138,7 +136,8 @@ def main():
         with open(vacuum, encoding='utf-8') as f:
             saved = f.read()
         if 'meta: set platformLanguage Python' not in out or 'platformLanguage/ Python' not in saved:
-            print('FAIL platform language: {}'.format(out))
+            print('FAIL platform language (an editor older than the declared '
+                  'metainformation of the actions, EDIT-PLUG-34?): {}'.format(out))
             failed += 1
         else:
             print('ok   platform language')
