@@ -85,9 +85,9 @@ if ticks == limit:
     <node id="nFinal">
       <data key="dVertex">final</data>
     </node>
-    <edge id="e0" source="nInitial" target="nRun"/>
-    <edge id="e2" source="nRunInitial" target="nCount"/>
-    <edge id="e1" source="nRun" target="nFinal">
+    <edge id="nInitial-nRun" source="nInitial" target="nRun"/>
+    <edge id="nRunInitial-nCount" source="nRunInitial" target="nCount"/>
+    <edge id="nRun-nFinal" source="nRun" target="nFinal">
       <data key="dData">DONE/
 say('DONE {}'.format(event.n))</data>
     </edge>
