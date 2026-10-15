@@ -20,6 +20,8 @@ Added:
 - the events with parameters (`DISPATCH('NAME', x=1)`, `event.x`), the
   components declared in the diagram and defined in the init scripts;
 - the `vacuum` example of the whole language;
+- the guide to the comments of a diagram (`docs/COMMENTS.md`) and the
+  `formal_comments` test of the formal form;
 - the plugin of the Cyberiada State Machine Editor (check, generate, run)
   and `hsm-run --install-editor-plugin`;
 - the pip installation and the Debian package.

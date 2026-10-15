@@ -40,6 +40,8 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog.md
               ${CMAKE_CURRENT_SOURCE_DIR}/README.md
               ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
         DESTINATION ${DOC_INSTALL_DIR})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/docs/COMMENTS.md
+        DESTINATION ${DOC_INSTALL_DIR}/docs)
 
 # the tests need the hsmd and CyberiadaML modules in this Python
 # (-DPython3_EXECUTABLE=... selects another one)

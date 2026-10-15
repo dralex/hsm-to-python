@@ -100,7 +100,12 @@ comments of every machine of the document count, in the document order:
 | `Global Initialization` | code run once at the start of the program: imports, variables, functions |
 | `Init Scripts` | names of `.py` files beside the diagram, inlined into the program |
 | `Arguments` (or `SM Constructor Arguments`) | `name = value` lines: the arguments of the program with their defaults, Python literals |
-| `loop` | code run on every iteration of the loop |
+| `loop` | code run on every iteration of the loop (`global` to assign) |
+
+[docs/COMMENTS.md](docs/COMMENTS.md) is the guide to the comments: both
+forms, the order the code runs in, the traps (an unnamed formal comment is
+ignored), the component and meta comments, and how to make them in the
+editor.
 
 The program posts the events `INIT` (once, after the start), `TIME_TICK`
 (every `--tick` milliseconds) and `TIME_TICK_1S` (every second). The text of
@@ -192,7 +197,8 @@ diagram and prints its output. The diagrams are CyberiadaML except
 vacuum cleaner, is the full example: two machines with a submachine state,
 history, deferred and propagated events, a choice, event parameters, a
 component defined in the init script `vacuum_battery.py`, and every
-convention comment. The plugin test needs the editor binary
+convention comment; `formal_comments.graphml` writes them as formal comments
+and keeps the comments that must be ignored. The plugin test needs the editor binary
 (`CYBERIADA_EDITOR`, the `PATH`, or the sibling build) and the installed
 commands; it says when it skips. When the dispatcher is not installed, the
 tests take it from `../hsm-dispatcher-py` beside this repository.
