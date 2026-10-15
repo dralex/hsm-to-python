@@ -31,6 +31,8 @@ endforeach()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/editor-plugin/plugin.json
         DESTINATION ${PLUGIN_INSTALL_DIR})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/editor-plugin/i18n/ru.json
+        DESTINATION ${PLUGIN_INSTALL_DIR}/i18n)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog.md
               ${CMAKE_CURRENT_SOURCE_DIR}/README.md

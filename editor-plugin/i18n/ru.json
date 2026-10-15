@@ -1,0 +1,18 @@
+{
+  "HSM to Python": "HSM в Python",
+  "Checks the Python code of the diagram, generates its program and runs it on the HSM dispatcher. Needs the hsm-to-python modules with hsmd and CyberiadaML in the Python the plugin runs with.": "Проверяет код Python в диаграмме, генерирует по ней программу и запускает её на диспетчере машин состояний. Нужны модули hsm-to-python, hsmd и CyberiadaML в том Python, с которым работает плагин.",
+  "State machine": "Машина состояний",
+  "The state machine to run; empty: the first one": "Запускаемая машина состояний; пусто — первая",
+  "Tick, ms": "Такт, мс",
+  "The period of the TIME_TICK event": "Период события TIME_TICK",
+  "Program directory": "Каталог программы",
+  "Run time limit, s": "Ограничение времени работы, с",
+  "0: no limit": "0 — без ограничения",
+  "Arguments (name = value per line)": "Аргументы (имя = значение, по одному на строку)",
+  "Check the code": "Проверить код",
+  "Lint the Python code of the states and the transitions": "Проверить код Python в состояниях и переходах",
+  "Generate the program...": "Сгенерировать программу...",
+  "Write the Python program of the diagram into the directory": "Записать программу на Python по диаграмме в каталог",
+  "Run the diagram...": "Запустить диаграмму...",
+  "Run the diagram on the dispatcher; the output goes to the Output tab": "Запустить диаграмму на диспетчере; вывод попадает во вкладку «Вывод»"
+}

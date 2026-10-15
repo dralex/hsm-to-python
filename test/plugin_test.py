@@ -67,7 +67,8 @@ def installer():
             descriptor = json.load(f)
         pinned = ('interpreter' not in descriptor and
                   all(a['argv'][0] == sys.executable for a in descriptor['actions']))
-        if folder != os.path.join(directory, PLUGIN) or not pinned:
+        translated = os.path.isfile(os.path.join(folder, 'i18n', 'ru.json'))
+        if folder != os.path.join(directory, PLUGIN) or not pinned or not translated:
             print('FAIL install: {} {}'.format(folder, descriptor.get('actions')))
             failed += 1
         elif hsmplugin.install(directory) != folder:
@@ -87,8 +88,29 @@ def installer():
     return failed
 
 
+def translation():
+    """The Russian texts: every key is a text of the descriptor, every text is
+    translated (the editor shows them by the interface language)."""
+    with open(os.path.join(REPOSITORY, 'editor-plugin', 'plugin.json'), encoding='utf-8') as f:
+        descriptor = json.load(f)
+    with open(os.path.join(REPOSITORY, 'editor-plugin', 'i18n', 'ru.json'), encoding='utf-8') as f:
+        ru = json.load(f)
+    texts = {descriptor['name'], descriptor.get('description', '')}
+    for item in descriptor.get('parameters', []) + descriptor['actions']:
+        texts.update([item.get('label', ''), item.get('description', '')])
+        texts.update(item.get('choices', []))
+    texts.discard('')
+    stale = sorted(set(ru) - texts)
+    missing = sorted(texts - set(ru))
+    if stale or missing:
+        print('FAIL translation: stale {} missing {}'.format(stale, missing))
+        return 1
+    print('ok   translation')
+    return 0
+
+
 def main():
-    failed = installer()
+    failed = installer() + translation()
     binary = editor()
     if binary is None:
         print('skipped the editor part: no CyberiadaEditor binary')

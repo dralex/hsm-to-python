@@ -30,3 +30,4 @@ py-modules = ["gencode", "hsm", "hsmcheck", "hsmplugin"]
 # copies it into the plugin folder of the editor
 [tool.setuptools.data-files]
 "share/cyberiada-editor/plugins/hsm-to-python" = ["editor-plugin/plugin.json"]
+"share/cyberiada-editor/plugins/hsm-to-python/i18n" = ["editor-plugin/i18n/ru.json"]
