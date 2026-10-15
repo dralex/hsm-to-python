@@ -54,38 +54,11 @@
   ],
   "actions": [
     {
-      "id": "check",
-      "label": "Check the code",
-      "result": "diagnostics",
-      "save": true,
-      "exit_ok": [
-        0,
-        1
-      ],
-      "toolbar": true,
-      "description": "Lint the Python code of the states and the transitions",
-      "argv": [
-        "-m",
-        "hsmcheck",
-        "${document}",
-        "--json",
-        "${diagnostics}",
-        {
-          "if": "main",
-          "argv": [
-            "--main",
-            "${param:main}"
-          ]
-        }
-      ],
-      "parameters": [
-        "main"
-      ]
-    },
-    {
       "id": "generate",
       "label": "Generate the program...",
       "result": "files",
+      "toolbar": true,
+      "icon": "icons/generate.svg",
       "save": true,
       "outdir": "dir",
       "description": "Write the Python program of the diagram into the directory",
@@ -111,11 +84,42 @@
       ]
     },
     {
+      "id": "check",
+      "label": "Check the code",
+      "result": "diagnostics",
+      "save": true,
+      "exit_ok": [
+        0,
+        1
+      ],
+      "icon": "icons/check.svg",
+      "toolbar": true,
+      "description": "Lint the Python code of the states and the transitions",
+      "argv": [
+        "-m",
+        "hsmcheck",
+        "${document}",
+        "--json",
+        "${diagnostics}",
+        {
+          "if": "main",
+          "argv": [
+            "--main",
+            "${param:main}"
+          ]
+        }
+      ],
+      "parameters": [
+        "main"
+      ]
+    },
+    {
       "id": "run",
       "label": "Run the diagram...",
       "result": "log",
       "save": true,
       "timeout": 0,
+      "icon": "icons/run.svg",
       "toolbar": true,
       "description": "Run the diagram on the dispatcher; the output goes to the Output tab",
       "argv": [
