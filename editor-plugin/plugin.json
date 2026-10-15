@@ -60,6 +60,9 @@
       "toolbar": true,
       "icon": "icons/generate.svg",
       "save": true,
+      "meta": {
+        "platformLanguage": "Python"
+      },
       "outdir": "dir",
       "description": "Write the Python program of the diagram into the directory",
       "argv": [
@@ -88,6 +91,9 @@
       "label": "Check the code",
       "result": "diagnostics",
       "save": true,
+      "meta": {
+        "platformLanguage": "Python"
+      },
       "exit_ok": [
         0,
         1
@@ -118,6 +124,9 @@
       "label": "Run the diagram...",
       "result": "log",
       "save": true,
+      "meta": {
+        "platformLanguage": "Python"
+      },
       "timeout": 0,
       "icon": "icons/run.svg",
       "toolbar": true,

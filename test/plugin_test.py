@@ -121,25 +121,39 @@ def main():
         failed += 1
     else:
         print('ok   list')
-    code, out = batch(binary, 'test/graphs/vacuum.graphml', '--plugin-path', '.',
-                      '--run-plugin', PLUGIN + ':check', '--dump-plugin')
-    if code != 0 or 'undefined' in out:
-        print('FAIL check vacuum: exit {}\n{}'.format(code, out))
-        failed += 1
-    else:
-        print('ok   check vacuum')
-    code, out = batch(binary, 'test/lint/bad.graphml', '--plugin-path', '.',
-                      '--run-plugin', PLUGIN + ':check', '--dump-plugin')
-    if code != 0 or 'syntax-error' not in out or 'count: 0' in out:
-        print('FAIL check bad: exit {}\n{}'.format(code, out))
-        failed += 1
-    else:
-        print('ok   check bad')
+    # the actions save the document after filling its platform language: copies,
+    # with the Python files the diagrams import
     with tempfile.TemporaryDirectory() as directory:
-        code, out = batch(binary, 'test/graphs/vacuum.graphml', '--plugin-path', '.',
+        for folder in ('graphs', 'lint'):
+            shutil.copytree(os.path.join(REPOSITORY, 'test', folder), os.path.join(directory, folder))
+        vacuum = os.path.join(directory, 'graphs', 'vacuum.graphml')
+        bad = os.path.join(directory, 'lint', 'bad.graphml')
+        code, out = batch(binary, vacuum, '--plugin-path', '.',
+                          '--run-plugin', PLUGIN + ':check', '--dump-plugin')
+        if code != 0 or 'undefined' in out:
+            print('FAIL check vacuum: exit {}\n{}'.format(code, out))
+            failed += 1
+        else:
+            print('ok   check vacuum')
+        with open(vacuum, encoding='utf-8') as f:
+            saved = f.read()
+        if 'meta: set platformLanguage Python' not in out or 'platformLanguage/ Python' not in saved:
+            print('FAIL platform language: {}'.format(out))
+            failed += 1
+        else:
+            print('ok   platform language')
+        code, out = batch(binary, bad, '--plugin-path', '.',
+                          '--run-plugin', PLUGIN + ':check', '--dump-plugin')
+        if code != 0 or 'syntax-error' not in out or 'count: 0' in out:
+            print('FAIL check bad: exit {}\n{}'.format(code, out))
+            failed += 1
+        else:
+            print('ok   check bad')
+        program_dir = os.path.join(directory, 'program')
+        code, out = batch(binary, vacuum, '--plugin-path', '.',
                           '--run-plugin', PLUGIN + ':generate', '--plugin-param',
-                          'dir=' + directory, '--dump-plugin')
-        program = os.path.join(directory, 'vacuum.py')
+                          'dir=' + program_dir, '--dump-plugin')
+        program = os.path.join(program_dir, 'vacuum.py')
         if code != 0 or not os.path.isfile(program):
             print('FAIL generate: exit {}\n{}'.format(code, out))
             failed += 1

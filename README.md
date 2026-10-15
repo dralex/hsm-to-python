@@ -166,10 +166,13 @@ as `name = value` lines). Install the directory as `hsm-to-python/` into the
 editor's plugin folder: the Debian package does it, `hsm-run
 --install-editor-plugin` does it for a pip installation (see Installation,
 and the editor's `docs/PLUGIN-API.md`, Packaging). The plugin runs the
-modules of this tool with the Python it was installed with. To try it from
-the repository, with `hsmd` on the Python path:
+modules of this tool with the Python it was installed with. The actions
+declare the platform language Python: the editor sets it on a diagram that has
+none and saves the diagram before the run. To try it from the repository, with
+`hsmd` on the Python path, on a copy of the test diagrams:
 
-    CyberiadaEditor --batch test/graphs/vacuum.graphml --plugin-path . \
+    cp -r test/graphs /tmp/graphs
+    CyberiadaEditor --batch /tmp/graphs/vacuum.graphml --plugin-path . \
         --run-plugin hsm-to-python:check --dump-plugin
 
 ## Tests
