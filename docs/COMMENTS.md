@@ -41,7 +41,7 @@ the standard (PNST 1044-2025), interpreted by the dispatcher.
 |---|---|---|
 | the key | the name of the comment | the first line of the body |
 | the content | the whole body | the body after the first line |
-| typical source | the CyberiadaHSM-Editor | yEd and the older diagrams |
+| typical source | CyberiadaPro | yEd and the older diagrams |
 
 The same comment in both forms, as it is stored:
 

@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # The HSM-to-Python testing infrastructure
 #
-# The editor plugin, run through the batch mode of CyberiadaEditor
+# The editor plugin, run through the batch mode of CyberiadaPro
 #
 # Copyright (C) 2026 Alexey Fedoseev <aleksey@fedoseev.net>
 #
@@ -34,10 +34,10 @@ PLUGIN = 'hsm-to-python'
 
 
 def editor():
-    """The editor binary: CYBERIADA_EDITOR, PATH, or the sibling build."""
-    candidates = [os.environ.get('CYBERIADA_EDITOR'), shutil.which('CyberiadaEditor'),
+    """The editor binary: CYBERIADA_PRO, PATH, or the sibling build."""
+    candidates = [os.environ.get('CYBERIADA_PRO'), shutil.which('CyberiadaPro'),
                   os.path.join(REPOSITORY, '..', 'CyberiadaHSM-Editor', 'build',
-                               'CyberiadaEditor')]
+                               'CyberiadaPro')]
     for path in candidates:
         if path and os.path.isfile(path) and os.access(path, os.X_OK):
             return path
@@ -45,10 +45,14 @@ def editor():
 
 
 def batch(binary, *args):
-    env = dict(os.environ, QT_QPA_PLATFORM='offscreen')
-    result = subprocess.run([binary, '--batch'] + list(args), stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, universal_newlines=True, env=env,
-                            cwd=REPOSITORY, check=False, timeout=120)
+    # a private profile: the run neither reads nor writes the user's settings
+    with tempfile.TemporaryDirectory() as profile:
+        env = dict(os.environ, QT_QPA_PLATFORM='offscreen',
+                   XDG_CONFIG_HOME=os.path.join(profile, 'config'),
+                   XDG_DATA_HOME=os.path.join(profile, 'data'))
+        result = subprocess.run([binary, '--batch'] + list(args), stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, universal_newlines=True, env=env,
+                                cwd=REPOSITORY, check=False, timeout=120)
     return result.returncode, result.stdout
 
 
@@ -108,7 +112,7 @@ def main():
     failed = installer() + translation()
     binary = editor()
     if binary is None:
-        print('skipped the editor part: no CyberiadaEditor binary')
+        print('skipped the editor part: no CyberiadaPro binary')
         return 1 if failed else 0
     print('editor: {}'.format(os.path.realpath(binary)))
     code, out = batch(binary, '--plugin-path', '.', '--list-plugins')

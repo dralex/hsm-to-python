@@ -29,7 +29,8 @@ Added:
 - the tests take the modules of this repository before their installed
   copies, and stop on a dispatcher older than the generator needs
   (`test/testenv.py`);
-- the plugin of the Cyberiada State Machine Editor (check, generate, run)
+- the plugin of CyberiadaPro, the Cyberiada state machine editor (check,
+  generate, run)
   and `hsm-run --install-editor-plugin`;
 - the pip installation and the Debian package.
 

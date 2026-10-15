@@ -32,8 +32,8 @@ import sys
 PLUGIN_ID = 'hsm-to-python'
 DESCRIPTOR = 'plugin.json'
 SOURCE_TREE = 'editor-plugin'
-SHARE = ('share', 'cyberiada-editor', 'plugins', PLUGIN_ID)
-EDITOR_FOLDER = ('Cyberiada', 'Cyberiada State Machine Editor', 'plugins')
+SHARE = ('share', 'cyberiada-pro', 'plugins', PLUGIN_ID)
+EDITOR_FOLDER = ('Cyberiada', 'CyberiadaPro', 'plugins')
 
 
 class PluginError(Exception):

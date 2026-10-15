@@ -7,8 +7,8 @@ project(hsm-to-python VERSION 2.0.0 LANGUAGES NONE)
 # the place of the pure Python modules on Debian
 set(PYTHON_INSTALL_DIR "lib/python3/dist-packages" CACHE STRING
     "the directory of the modules under the prefix")
-# the system plugin folder of CyberiadaHSM-Editor
-set(PLUGIN_INSTALL_DIR "share/cyberiada-editor/plugins/hsm-to-python")
+# the system plugin folder of CyberiadaPro
+set(PLUGIN_INSTALL_DIR "share/cyberiada-pro/plugins/hsm-to-python")
 set(DOC_INSTALL_DIR "share/doc/python3-hsm-to-python")
 # the package directories do not follow the umask of the build
 set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE

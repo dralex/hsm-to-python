@@ -30,8 +30,8 @@ The Debian packages, built in each repository:
 selects another one; the tests of this tool need `hsmd` and `CyberiadaML`
 there). The second package installs the commands `hsm-run`, `hsm-gencode`
 and `hsm-check` and puts the editor plugin into
-`/usr/share/cyberiada-editor/plugins/hsm-to-python/`, where
-`CyberiadaHSM-Editor` finds it; it recommends `pylint` for the code check.
+`/usr/share/cyberiada-pro/plugins/hsm-to-python/`, where
+`CyberiadaPro` finds it; it recommends `pylint` for the code check.
 
 With pip (a virtual environment, the user site, Windows, macOS), the two
 source trees side by side:
@@ -53,7 +53,7 @@ Checks of the installation, from this repository:
 
     hsm-check test/graphs/vacuum.graphml      # no findings
     hsm-run test/graphs/term_node.graphml     # INIT, ENTRY A, ENTRY B, TERM
-    CyberiadaEditor --batch --list-plugins    # hsm-to-python ... enabled
+    CyberiadaPro --batch --list-plugins       # hsm-to-python ... enabled
 
 A generated program carries its diagram and needs, where it runs, the
 `hsmd` module and the `CyberiadaML` module.
@@ -154,7 +154,7 @@ from the init scripts, so a wrong member is found), `pyflakes` otherwise;
 without either only the syntax of every block is checked. The tool is taken
 from this interpreter or from the `PATH`. The exit code is 1 when there is
 an error. `--json FILE` writes the findings in the diagnostics format of the
-CyberiadaHSM-Editor plugins.
+CyberiadaPro plugins.
 
 The check runs on the lint view of the diagram, which `hsm-gencode --lint`
 writes: one module with the initialization code, the components and
@@ -165,7 +165,7 @@ defined at module level.
 
 ## The editor plugin
 
-`editor-plugin/` holds the plugin for the CyberiadaHSM-Editor (its plugin
+`editor-plugin/` holds the plugin for CyberiadaPro (its plugin
 interface, level 1): the actions *Check the code* (the findings appear on
 the elements), *Generate the program...* (into a chosen directory) and *Run
 the diagram...* (the output in the plugin dock, a time limit, the arguments
@@ -179,7 +179,7 @@ none and saves the diagram before the run. To try it from the repository, with
 `hsmd` on the Python path, on a copy of the test diagrams:
 
     cp -r test/graphs /tmp/graphs
-    CyberiadaEditor --batch /tmp/graphs/vacuum.graphml --plugin-path . \
+    CyberiadaPro --batch /tmp/graphs/vacuum.graphml --plugin-path . \
         --run-plugin hsm-to-python:check --dump-plugin
 
 ## Tests
@@ -203,7 +203,7 @@ component defined in the init script `vacuum_battery.py`, and every
 convention comment; `formal_comments.graphml` writes them as formal comments
 and keeps the comments that must be ignored; `external.graphml` runs a machine
 of the document `lib/worker.graphml`. The plugin test needs the editor binary
-(`CYBERIADA_EDITOR`, the `PATH`, or the sibling build), prints the one it uses
+(`CYBERIADA_PRO`, the `PATH`, or the sibling build), prints the one it uses
 and says when it skips.
 
 The tests take the modules of this repository before their installed copies
