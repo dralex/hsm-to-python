@@ -31,6 +31,8 @@ import hsmd_reader
 
 VERSION = '2.0'
 TICK_LEN = 100                          # the period of TIME_TICK, ms
+# the events the program posts itself; the time events come from the dispatcher
+PROGRAM_EVENTS = ('INIT',)
 
 # the convention comments: the key is the name of a formal comment or the
 # first line of an informal one, normalised by normalize()
@@ -122,29 +124,17 @@ def _set_arguments(defaults):
 '''
 
 FOOTER = '''
-dispatcher = hsmd.Dispatcher(machine, namespace=globals())
+# the time events and the timers come with dispatcher.tick()
+dispatcher = hsmd.Dispatcher(machine, namespace=globals(), period=TICK_LEN / 1000.0)
 
 
 def main():
     dispatcher.start()
     dispatcher.post('INIT')
     dispatcher.run()
-    period = TICK_LEN / 1000.0
-    start = time.monotonic()
-    next_tick = start + period
-    next_second = start + 1.0
     while not dispatcher.finished():
-{loop}        now = time.monotonic()
-        if now >= next_tick:
-            dispatcher.post('TIME_TICK')
-            while next_tick <= now:
-                next_tick += period
-        if now >= next_second:
-            dispatcher.post('TIME_TICK_1S')
-            while next_second <= now:
-                next_second += 1.0
-        dispatcher.tick()
-        time.sleep(period)
+{loop}        dispatcher.tick()
+        time.sleep(TICK_LEN / 1000.0)
     return 0
 
 

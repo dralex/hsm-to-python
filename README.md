@@ -144,8 +144,12 @@ forms, the order the code runs in, the traps (an unnamed formal comment is
 ignored), the component and meta comments, and how to make them in the
 editor.
 
-The program posts the events `INIT` (once, after the start), `TIME_TICK`
-(every `--tick` milliseconds) and `TIME_TICK_1S` (every second). The text of
+The program posts `INIT` once, after the start; the dispatcher posts the time
+events the diagram uses: `TIME_TICK` (every `--tick` milliseconds),
+`TIME_TICK_1S`, `TIME_TICK_1M` and `TIME_TICK_1H` (every second, minute and
+hour from the start). An interval the diagram starts and stops itself is a
+`Timer` component (`CGML_COMPONENT t` with `type/ Timer`): `t.start(500)` and
+the trigger `t.TIMEOUT`, one declaration per timer. The text of
 the diagram posts its own events with `DISPATCH('NAME', parameter=value)`;
 a transition reads the parameters as `event.parameter`:
 
@@ -223,7 +227,8 @@ none and saves the diagram before the run. To try it from the repository, with
     cd test
     python3 python_hsm_test.py      # the diagrams, their code check, the lint tests
     python3 arguments_test.py       # --set, --settings, --help of a generated program
-    python3 standalone_test.py      # a generated program runs without the diagram and CyberiadaML
+    python3 standalone_test.py      # a generated program runs without the diagram and CyberiadaML,
+                                    # the minute events on a faster clock
     python3 plugin_test.py          # the editor plugin in the batch mode of the editor
 
 Each test is a diagram `test/graphs/<name>.graphml` with the expected output

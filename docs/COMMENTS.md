@@ -29,7 +29,7 @@ of the dispatcher (`hsm-dispatcher-py/docs/ARCHITECTURE.md`).
                                                  start, post INIT
                                                  while the machine is not finished:
  Loop                   ──────────────────▶          the loop code
-                                                     TIME_TICK, TIME_TICK_1S, tick()
+                                                     tick(): the time events, the timers
                                                      sleep TICK_LEN
  any other comment      ──▶ not in the program
 ```

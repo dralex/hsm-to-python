@@ -66,6 +66,15 @@ ratio = 1 / count</data>
 </graphml>
 '''
 FAILURE = "machine 'G', state 's', entry, line 2: ZeroDivisionError"
+# a minute in half a second: the program runs on a faster clock
+SPEED = 120
+FAST_CLOCK = '''import runpy, sys, time
+real = time.monotonic
+start = real()
+time.monotonic = lambda: start + (real() - start) * {}
+sys.argv = sys.argv[1:]
+runpy.run_path(sys.argv[0], run_name='__main__')
+'''.format(SPEED)
 
 
 def run_alone(program, directory):
@@ -121,8 +130,26 @@ def check_failure():
     return 0
 
 
+def check_minutes():
+    """TIME_TICK_1M from the dispatcher, on a clock SPEED times faster."""
+    with open(os.path.join('time', 'minutes.txt'), encoding='utf-8') as f:
+        expected = f.read()
+    with tempfile.TemporaryDirectory() as directory:
+        program = os.path.join(directory, 'minutes.py')
+        gencode.CodeGenerator(os.path.join('time', 'minutes.graphml')).generate_code(program)
+        result = subprocess.run([sys.executable, '-c', FAST_CLOCK, program],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                universal_newlines=True, check=False, timeout=60)
+    if result.returncode != 0 or result.stdout != expected:
+        print('FAIL minutes: exit {}\n{}{}'.format(result.returncode, result.stdout,
+                                                   result.stderr))
+        return 1
+    print('ok   minutes')
+    return 0
+
+
 def main():
-    failed = check_failure()
+    failed = check_failure() + check_minutes()
     for name in DIAGRAMS:
         failed += check_program(name)
     return 1 if failed else 0
