@@ -19,6 +19,8 @@ Changed:
 Added:
 - the time events `TIME_TICK_1M` and `TIME_TICK_1H`; the time events come
   from the dispatcher's `tick()`, only those the diagram uses;
+- the names of the generated functions in Latin letters: the Cyrillic
+  transliterated, the accents dropped (`russian` test);
 - the checks of the machine in `hsm-check`, `hsm-run` and `hsm-gencode`:
   the events nothing posts, the unknown component signals, the posted
   events nothing takes, the unreachable states, the composite states

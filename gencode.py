@@ -26,6 +26,7 @@ import ast
 import os
 import re
 import sys
+import unicodedata
 
 import hsmd_reader
 
@@ -50,6 +51,14 @@ INDENT = ' ' * 4
 LINE_LENGTH = 99
 # the names of the unnamed vertices in the names of the functions
 LABELS = {'shallow': 'history', 'deep': 'history'}
+# the Latin spelling of the Cyrillic letters in the names of the functions
+CYRILLIC = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
+    'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
+    'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts',
+    'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu',
+    'я': 'ya', 'і': 'i', 'ї': 'yi', 'є': 'ye', 'ґ': 'g', 'ў': 'u',
+}
 # the declarations of the pseudostates
 PSEUDOSTATES = {'initial': 'Initial', 'final': 'Final', 'terminate': 'Terminate',
                 'choice': 'Choice', 'shallow': 'History', 'deep': 'History'}
@@ -167,13 +176,28 @@ def normalize(key):
     return SYNONYMS.get(key, key)
 
 
+def latin(text):
+    """The text in Latin letters: the Cyrillic ones spelled by CYRILLIC, the
+    others without their accents."""
+    chars = []
+    for char in text:
+        lower = char.lower()
+        if lower in CYRILLIC:
+            spelling = CYRILLIC[lower]
+            chars.append(spelling.capitalize() if char != lower else spelling)
+        else:
+            chars.append(''.join(c for c in unicodedata.normalize('NFKD', char)
+                                 if not unicodedata.combining(c)))
+    return ''.join(chars)
+
+
 def identifier(text):
-    return re.sub(r'\W', '_', text)
+    return re.sub(r'[^0-9A-Za-z_]', '_', latin(text))
 
 
 def python_name(text):
-    """An identifier made of the text: the name of an element, an event."""
-    name = re.sub(r'\W+', '_', text).strip('_') or 'x'
+    """An ASCII identifier made of the text: the name of an element, an event."""
+    name = re.sub(r'[^0-9A-Za-z]+', '_', latin(text)).strip('_') or 'x'
     return '_' + name if name[0].isdigit() else name
 
 
@@ -334,8 +358,14 @@ class MachineCode:
 
     @staticmethod
     def label(vertex):
-        """The name of a vertex in the names of the functions."""
+        """The name of a vertex in the comments."""
         return vertex.name or LABELS.get(vertex.kind, vertex.kind)
+
+    def part(self, vertex):
+        """The name of a vertex in the names of the functions; its identifier
+        when no Latin letter is left of its name."""
+        label = self.label(vertex)
+        return label if re.search('[A-Za-z]', latin(label)) else vertex.id
 
     def reaction_args(self, reaction, base):
         """The guard, the action and the flags of a transition, as arguments."""
@@ -355,7 +385,7 @@ class MachineCode:
 
     def pieces(self, vertex, kind, blocks):
         """entry= or exit= of a state: one function or a list."""
-        names = [self.function('{}_{}'.format(self.label(vertex), kind), b.text, b.where)
+        names = [self.function('{}_{}'.format(self.part(vertex), kind), b.text, b.where)
                  for b in blocks if b.text.strip()]
         if not names:
             return []
@@ -372,7 +402,7 @@ class MachineCode:
         internal = []
         for reaction in vertex.reactions:
             if reaction.target is None:
-                base = '{}_{}'.format(self.label(vertex), reaction.trigger)
+                base = '{}_{}'.format(self.part(vertex), reaction.trigger)
                 internal += wrapped(indent + INDENT, 'hsmd.On',
                                     [repr(reaction.trigger)] + self.reaction_args(reaction, base),
                                     ',')
@@ -427,10 +457,10 @@ class MachineCode:
             number += 1
             default = '{}#{}'.format(ends, number)
         used.add(reaction.id)
-        base = '{}_to_{}'.format(self.label(source), self.label(target))
+        base = '{}_to_{}'.format(self.part(source), self.part(target))
         args = [repr(source.id), repr(target.id)]
         if reaction.trigger:
-            base = '{}_{}_to_{}'.format(self.label(source), reaction.trigger, self.label(target))
+            base = '{}_{}_to_{}'.format(self.part(source), reaction.trigger, self.part(target))
             args.append(repr(reaction.trigger))
         args += self.reaction_args(reaction, base)
         if reaction.id != default:

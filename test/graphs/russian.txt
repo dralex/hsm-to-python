@@ -1,0 +1,4 @@
+waiting
+started
+working
+done

@@ -111,7 +111,10 @@ machine = hsmd.Machine('SiteMonitor', id='G0', states=[
 The functions are named after the elements: `<State>_entry`, `<State>_exit`,
 `<State>_<EVENT>` for an internal transition, `<Source>_<EVENT>_to_<Target>`
 (`<Source>_to_<Target>` without an event) for a transition, `_guard` added for
-a guard; a suffix only when a name is taken. A block is the body of its
+a guard; a suffix only when a name is taken. The names are ASCII: the
+Cyrillic letters are transliterated (`Отсчет` gives `Otschet_entry`), the
+other letters lose their accents; the declarations keep the names as
+written. A block is the body of its
 function as written, the names it assigns declared `global`. A syntax error
 in the diagram's code stops the generation with the element and the line;
 an error at run time names the element and the line of the block.
@@ -262,7 +265,8 @@ convention comment; `formal_comments.graphml` writes them as formal comments
 and keeps the comments that must be ignored; `external.graphml` runs a machine
 of the document `lib/worker.graphml`; `code_layout.graphml` keeps the layout of
 the generated code (a multi-line string, a block of comments only, a function
-name the initialization takes). The plugin test needs the editor binary
+name the initialization takes); `russian.graphml` has Russian names and a
+Russian event, transliterated in the names of the functions. The plugin test needs the editor binary
 (`CYBERIADA_PRO`, the `PATH`, or the sibling build), prints the one it uses
 and says when it skips.
 

@@ -22,6 +22,7 @@
 # -----------------------------------------------------------------------------
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -66,6 +67,12 @@ ratio = 1 / count</data>
 </graphml>
 '''
 FAILURE = "machine 'G', state 's', entry, line 2: ZeroDivisionError"
+# the names of the functions in Latin letters
+NAMES = [('Отсчет_entry', 'Otschet_entry'), ('Ожидание_GO_to_Работа', 'Ozhidanie_GO_to_Rabota'),
+         ('Щука', 'Shchuka'), ('Ёж', 'Yozh'), ('Їжак', 'Yizhak'), ('café', 'cafe'),
+         ('2nd state', '_2nd_state'), ('', 'x')]
+RUSSIAN = ('Ozhidanie_entry', 'Rabota_entry', 'Ozhidanie_INIT_to_Rabota', 'Rabota_DALEE_to_Gotovo')
+DEFINITION = re.compile(r'^def (\S+)\(', re.M)
 # a minute in half a second: the program runs on a faster clock
 SPEED = 120
 FAST_CLOCK = '''import runpy, sys, time
@@ -148,8 +155,26 @@ def check_minutes():
     return 0
 
 
+def check_names():
+    """The generated functions have ASCII names, the Cyrillic transliterated."""
+    bad = [(text, gencode.python_name(text)) for text, name in NAMES
+           if gencode.python_name(text) != name]
+    with tempfile.TemporaryDirectory() as directory:
+        program = os.path.join(directory, 'russian.py')
+        gencode.CodeGenerator(os.path.join(GRAPHS_DIR, 'russian.graphml')).generate_code(program)
+        with open(program, encoding='utf-8') as f:
+            defined = DEFINITION.findall(f.read())
+    bad += [name for name in defined if not name.isascii()]
+    bad += [name for name in RUSSIAN if name not in defined]
+    if bad:
+        print('FAIL names: {!r}'.format(bad))
+        return 1
+    print('ok   names')
+    return 0
+
+
 def main():
-    failed = check_failure() + check_minutes()
+    failed = check_failure() + check_minutes() + check_names()
     for name in DIAGRAMS:
         failed += check_program(name)
     return 1 if failed else 0
