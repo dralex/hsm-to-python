@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dName" for="graph" attr.name="name" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <graph id="G" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">Rules</data>
+    <node id="nMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0</data>
+    </node>
+    <node id="c_t">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT t</data>
+      <data key="dData">type/ Timer</data>
+    </node>
+    <node id="nInit">
+      <data key="dNote">formal</data>
+      <data key="dName">Global Initialization</data>
+      <data key="dData">x = 0</data>
+    </node>
+    <node id="init">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="a">
+      <data key="dName">A</data>
+      <data key="dData">entry/
+t.start(100)
+DISPATCH('PING')
+DISPATCH('LOST')</data>
+    </node>
+    <node id="b">
+      <data key="dName">B</data>
+      <data key="dData">t.TIMEOUT/
+x += 1
+
+t.TICKED/
+x = 0
+
+nosuch.EVENT/
+x = 0
+
+TIMR_TICK/
+x = 0</data>
+      <graph id="b:" edgedefault="directed">
+        <node id="b1">
+          <data key="dName">B1</data>
+        </node>
+      </graph>
+    </node>
+    <node id="pick">
+      <data key="dVertex">choice</data>
+    </node>
+    <node id="d">
+      <data key="dName">D</data>
+      <graph id="d:" edgedefault="directed">
+        <node id="dinit">
+          <data key="dVertex">initial</data>
+        </node>
+        <node id="d1">
+          <data key="dName">D1</data>
+        </node>
+      </graph>
+    </node>
+    <node id="fin">
+      <data key="dVertex">final</data>
+    </node>
+    <edge id="init-a" source="init" target="a"/>
+    <edge id="a-b" source="a" target="b">
+      <data key="dData">PING/</data>
+    </edge>
+    <edge id="b-pick" source="b" target="pick">
+      <data key="dData">TIME_TICK_1S/</data>
+    </edge>
+    <edge id="pick-a" source="pick" target="a">
+      <data key="dData">[x &gt; 1]/</data>
+    </edge>
+    <edge id="pick-fin" source="pick" target="fin">
+      <data key="dData">[x &lt;= 1]/</data>
+    </edge>
+    <edge id="dinit-d1" source="dinit" target="d1"/>
+  </graph>
+</graphml>

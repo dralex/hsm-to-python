@@ -107,6 +107,8 @@ def run_lint_tests():
         with open(os.path.join(LINT_DIR, name + TEST_OUTPUT_EXT), encoding='utf-8') as f:
             expected = f.read()
         findings, _ = hsmcheck.check(gencode.CodeGenerator(os.path.join(LINT_DIR, filename)))
+        # the linter's findings; the machine checks have their own test
+        findings = [f for f in findings if f.rule not in hsmcheck.MODEL_RULES]
         output = ''.join('{} {} {} {}\n'.format(f.severity, f.element or '-', f.line or '-',
                                                  f.rule) for f in findings)
         if output != expected:

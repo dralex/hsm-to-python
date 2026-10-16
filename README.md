@@ -181,8 +181,24 @@ entry points is entered through it.
 
 ## The code check
 
-`hsm-check` gives the Python of the diagram to a lint tool and maps the
-findings back to the elements:
+`hsm-check` checks the machine first: the events of its triggers and its
+structure, on the machine the program runs (the submachine states inlined).
+
+    error: machine 'G0', state 'n1', internal transition 1: the event 'TIMER_TICK_1S' is never posted; did you mean 'TIME_TICK_1S'? (unknown-event)
+    warning: machine 'G0', final 'n2': no transition leads here (unreachable)
+
+| Rule | Severity | Finding |
+|---|---|---|
+| `unknown-event` | error | a trigger nothing posts: not `INIT`, a time event, `ANY` or `UNKNOWN`, nor a `DISPATCH('NAME')` of the code; a warning when a `DISPATCH` takes a computed name and the trigger is no string of the code |
+| `unknown-signal` | error | `<id>.<SIGNAL>` without the component `<id>`, or a signal its type does not declare (`signals` of the type; for a type of an init script also its `self.signal('X')` calls) |
+| `unhandled-event` | warning | a `DISPATCH('NAME')` no trigger, `ANY` or `UNKNOWN` takes |
+| `unreachable` | warning | a state, choice or final state no possible transition leads to |
+| `no-initial` | error | a composite state a transition enters by default without an initial pseudostate |
+| `no-else` | warning | a choice whose every way out has a guard and none is `else` |
+
+`hsm-run` and `hsm-gencode` print these findings too; with `--check` an
+error refuses the diagram. Then `hsm-check` gives the Python of the diagram
+to a lint tool and maps the findings back to the elements:
 
     error: machine 'G', state 'a', entry, line 1: Undefined variable 'debg' (undefined-variable)
     error: machine 'G', transition 'b-fin', line 1: Instance of 'Counter' has no 'ad' member (no-member)
@@ -227,6 +243,7 @@ none and saves the diagram before the run. To try it from the repository, with
     cd test
     python3 python_hsm_test.py      # the diagrams, their code check, the lint tests
     python3 arguments_test.py       # --set, --settings, --help of a generated program
+    python3 model_test.py           # the checks of the machine on the planted faults of test/model/
     python3 standalone_test.py      # a generated program runs without the diagram and CyberiadaML,
                                     # the minute events on a faster clock
     python3 plugin_test.py          # the editor plugin in the batch mode of the editor

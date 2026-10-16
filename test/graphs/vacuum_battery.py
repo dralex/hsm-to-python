@@ -6,6 +6,8 @@ class Battery(hsmd.Component):
     """The charge level; the signal LOW is raised once when the level
     passes under the threshold of the declaration."""
 
+    signals = {'LOW': ('level',)}
+
     def __init__(self, ident, dispatcher, **parameters):
         hsmd.Component.__init__(self, ident, dispatcher, **parameters)
         self.threshold = int(parameters.get('threshold', 20))

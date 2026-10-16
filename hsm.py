@@ -88,8 +88,11 @@ def run():
     except gencode.ParserError as e:
         sys.stderr.write('Graph parsing error: {}\n'.format(e))
         return EXIT_PARSER
-    if args.check and hsmcheck.report(generator):
-        return EXIT_PARSER
+    if args.check:
+        if hsmcheck.report(generator):
+            return EXIT_PARSER
+    else:
+        hsmcheck.warn(generator)
     with tempfile.NamedTemporaryFile(prefix='hsm-', suffix='.py', delete=False) as program:
         path = program.name
     # unbuffered: the output reaches a pipe line by line and survives a kill

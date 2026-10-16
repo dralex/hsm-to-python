@@ -19,6 +19,11 @@ Changed:
 Added:
 - the time events `TIME_TICK_1M` and `TIME_TICK_1H`; the time events come
   from the dispatcher's `tick()`, only those the diagram uses;
+- the checks of the machine in `hsm-check`, `hsm-run` and `hsm-gencode`:
+  the events nothing posts, the unknown component signals, the posted
+  events nothing takes, the unreachable states, the composite states
+  without an initial pseudostate, the choices without `else` (`model`
+  test);
 - the runner `hsm-run` and the generator `hsm-gencode` as commands, the
   check `hsm-check` of the Python code of a diagram with pylint or pyflakes
   over the lint view (`hsm-gencode --lint`);

@@ -606,6 +606,15 @@ class CodeGenerator:
         declarations = code.declarations()
         return code.functions, declarations
 
+    def program_code(self):
+        """The code of the program outside the machine, as (where, text): the
+        initialization, every init script and the loop."""
+        pieces = [(TITLES[SECTION_INIT], '\n'.join(self.__lines(SECTION_INIT)))]
+        pieces += [('{} {}'.format(TITLES[SECTION_SCRIPTS], name), text)
+                   for name, text in self.__scripts()]
+        pieces.append((TITLES[SECTION_LOOP], '\n'.join(self.__lines(SECTION_LOOP))))
+        return [(where, text) for where, text in pieces if text.strip()]
+
     def defined_names(self):
         """The names the program defines before the diagram's code: the
         program's own, the arguments, the components and the names of the
@@ -745,10 +754,12 @@ def run():
     args = parser.parse_args()
     try:
         generator = CodeGenerator(args.graph, main=args.main, tick_len=args.tick)
+        import hsmcheck  # pylint: disable=import-outside-toplevel
         if args.check:
-            import hsmcheck  # pylint: disable=import-outside-toplevel
             if hsmcheck.report(generator):
                 return 1
+        else:
+            hsmcheck.warn(generator)
         if args.lint:
             generator.generate_lint(args.output)
         else:
