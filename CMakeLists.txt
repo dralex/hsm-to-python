@@ -40,6 +40,10 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog.md
               ${CMAKE_CURRENT_SOURCE_DIR}/README.md
               ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
         DESTINATION ${DOC_INSTALL_DIR})
+
+# the machine-readable (DEP-5) copyright, where the Debian policy wants it
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/debian-copyright
+        DESTINATION ${DOC_INSTALL_DIR} RENAME copyright)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/docs/COMMENTS.md
         DESTINATION ${DOC_INSTALL_DIR}/docs)
 
