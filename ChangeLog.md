@@ -1,6 +1,6 @@
 # hsm-to-python project changelog
 
-## Version 2.0.0 (unreleased)
+## Version 2.0.0
 
 Changed:
 - the generated program is the Python code of the machine run by the HSM
