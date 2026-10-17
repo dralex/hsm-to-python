@@ -33,13 +33,26 @@ import hsmplugin  # pylint: disable=wrong-import-position
 PLUGIN = 'hsm-to-python'
 
 
+def starts(path):
+    """The editor starts here: a build of another machine (a source tree
+    mounted into a container) cannot load its libraries."""
+    try:
+        result = subprocess.run([path, '--help'],
+                                env=dict(os.environ, QT_QPA_PLATFORM='offscreen'),
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                check=False, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
+
+
 def editor():
-    """The editor binary: CYBERIADA_PRO, PATH, or the sibling build."""
+    """The editor binary that starts: CYBERIADA_PRO, PATH, or the sibling build."""
     candidates = [os.environ.get('CYBERIADA_PRO'), shutil.which('CyberiadaPro'),
                   os.path.join(REPOSITORY, '..', 'CyberiadaHSM-Editor', 'build',
                                'CyberiadaPro')]
     for path in candidates:
-        if path and os.path.isfile(path) and os.access(path, os.X_OK):
+        if path and os.path.isfile(path) and os.access(path, os.X_OK) and starts(path):
             return path
     return None
 
