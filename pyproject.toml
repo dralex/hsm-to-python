@@ -9,6 +9,7 @@ description = "Python programs of the CyberiadaML state machine diagrams on the 
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [{name = "Alexey Fedoseev", email = "aleksey@fedoseev.net"}]
+dependencies = ["hsm-dispatcher-py"]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
