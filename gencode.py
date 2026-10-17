@@ -28,6 +28,7 @@ import re
 import sys
 import unicodedata
 
+import hsmd_components
 import hsmd_reader
 
 VERSION = '2.0'
@@ -62,7 +63,6 @@ CYRILLIC = {
 # the declarations of the pseudostates
 PSEUDOSTATES = {'initial': 'Initial', 'final': 'Final', 'terminate': 'Terminate',
                 'choice': 'Choice', 'shallow': 'History', 'deep': 'History'}
-STANDARD_TYPES = ('Timer', 'Log')       # the component types of the dispatcher
 
 LINT_HEADER = '''import ast  # pylint: disable=unused-import
 import sys  # pylint: disable=unused-import
@@ -708,7 +708,7 @@ class CodeGenerator:
                   "event = hsmd.Event('')", '', '# The components:']
         for declaration in self.machine.components:
             ctype = declaration.type
-            if ctype in STANDARD_TYPES:
+            if hsmd_components.find(ctype) is not None:    # a type of the dispatcher
                 ctype = 'hsmd.' + ctype
             lines.append('{} = {}({!r}, None)'.format(declaration.id, ctype, declaration.id))
         # the names the program defines, so a block's new global gets a definition

@@ -151,8 +151,7 @@ The program posts `INIT` once, after the start; the dispatcher posts the time
 events the diagram uses: `TIME_TICK` (every `--tick` milliseconds),
 `TIME_TICK_1S`, `TIME_TICK_1M` and `TIME_TICK_1H` (every second, minute and
 hour from the start). An interval the diagram starts and stops itself is a
-`Timer` component (`CGML_COMPONENT t` with `type/ Timer`): `t.start(500)` and
-the trigger `t.TIMEOUT`, one declaration per timer. The text of
+`Timer` component (see The standard components). The text of
 the diagram posts its own events with `DISPATCH('NAME', parameter=value)`;
 a transition reads the parameters as `event.parameter`:
 
@@ -163,6 +162,28 @@ a transition reads the parameters as `event.parameter`:
 The names of the events are written in capitals. The rest of the language -
 the components, the order of the transitions, the special events, the
 submachine states - is the dispatcher's; see its architecture document.
+
+### The standard components
+
+A diagram declares a component with a formal comment `CGML_COMPONENT <id>`
+whose body is `type/ <Type>`, one declaration per instance; the text calls it
+by its identifier and its signals are the triggers `<id>.<SIGNAL>`:
+
+| Type | Calls and values | Triggers |
+|---|---|---|
+| `Timer` | `start(ms)` periodic, `once(ms)` a single time, `reset()`, `enable()`, `disable()`; `difference`, `enabled` | `t.TIMEOUT` |
+| `Clock` | `alarm(9)` every day at 09:00, `alarm(9, 30)`, `alarm()` every hour, `alarm(minute=None)` every minute, `cancel()`; `now`, `hour`, `minute`, `second`, `weekday` | `c.ALARM` |
+| `Console` | `last`, the last line read | `k.LINE` (`event.text`), `k.EOF` |
+| `Log` | `print(...)`, to the standard error | |
+
+```
+CGML_COMPONENT blink        entry/                     blink.TIMEOUT/
+type/ Timer                 blink.start(500)           led = not led
+```
+
+The console reads the standard input of the program; the Run of the editor
+plugin gives it none, so it sees `EOF` at once. A counter, a list, a random
+number are plain Python, no component.
 
 ### The arguments
 
@@ -266,7 +287,9 @@ and keeps the comments that must be ignored; `external.graphml` runs a machine
 of the document `lib/worker.graphml`; `code_layout.graphml` keeps the layout of
 the generated code (a multi-line string, a block of comments only, a function
 name the initialization takes); `russian.graphml` has Russian names and a
-Russian event, transliterated in the names of the functions. The plugin test needs the editor binary
+Russian event, transliterated in the names of the functions;
+`platform.graphml` uses `Timer.once` and `Log`, `test/console/echo.graphml`
+the console (run with an input by `standalone_test.py`). The plugin test needs the editor binary
 (`CYBERIADA_PRO`, the `PATH`, or the sibling build), prints the one it uses
 and says when it skips.
 

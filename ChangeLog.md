@@ -19,6 +19,9 @@ Changed:
 Added:
 - the time events `TIME_TICK_1M` and `TIME_TICK_1H`; the time events come
   from the dispatcher's `tick()`, only those the diagram uses;
+- the standard components of the dispatcher in the docs and the lint view
+  (`Timer` with `once()`, `Clock`, `Console`, `Log`; the lint view no more
+  reports `hsmd` without `Log`), the `platform` and `console` tests;
 - the names of the generated functions in Latin letters: the Cyrillic
   transliterated, the accents dropped (`russian` test);
 - the checks of the machine in `hsm-check`, `hsm-run` and `hsm-gencode`:

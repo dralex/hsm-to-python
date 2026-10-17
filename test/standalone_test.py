@@ -84,16 +84,17 @@ runpy.run_path(sys.argv[0], run_name='__main__')
 '''.format(SPEED)
 
 
-def run_alone(program, directory):
-    """Run the program where the CyberiadaML module cannot be imported."""
+def run_alone(program, directory, text=None):
+    """Run the program where the CyberiadaML module cannot be imported, the
+    text as its input."""
     blocked = os.path.join(directory, 'blocked')
     os.makedirs(blocked)
     with open(os.path.join(blocked, 'CyberiadaML.py'), 'w', encoding='utf-8') as f:
         f.write("raise ImportError('CyberiadaML is blocked')\n")
     env = dict(os.environ, PYTHONPATH=os.pathsep.join([blocked, os.environ['PYTHONPATH']]))
-    return subprocess.run([sys.executable, program], cwd=directory, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, universal_newlines=True, env=env,
-                          check=False, timeout=60)
+    return subprocess.run([sys.executable, program], cwd=directory, input=text or '',
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          universal_newlines=True, env=env, check=False, timeout=60)
 
 
 def check_program(name):
@@ -173,8 +174,24 @@ def check_names():
     return 0
 
 
+def check_console():
+    """The lines of the input as k.LINE, then k.EOF."""
+    with open(os.path.join('console', 'echo.txt'), encoding='utf-8') as f:
+        expected = f.read()
+    with tempfile.TemporaryDirectory() as directory:
+        program = os.path.join(directory, 'echo.py')
+        gencode.CodeGenerator(os.path.join('console', 'echo.graphml')).generate_code(program)
+        result = run_alone(program, directory, 'alpha\nbeta\n')
+    if result.returncode != 0 or result.stdout != expected:
+        print('FAIL console: exit {}\n{}{}'.format(result.returncode, result.stdout,
+                                                   result.stderr))
+        return 1
+    print('ok   console')
+    return 0
+
+
 def main():
-    failed = check_failure() + check_minutes() + check_names()
+    failed = check_failure() + check_minutes() + check_names() + check_console()
     for name in DIAGRAMS:
         failed += check_program(name)
     return 1 if failed else 0

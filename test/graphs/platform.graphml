@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dName" for="graph" attr.name="name" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <graph id="G" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <data key="dName">Platform</data>
+    <node id="nMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0</data>
+    </node>
+    <node id="c_t">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT t</data>
+      <data key="dData">type/ Timer</data>
+    </node>
+    <node id="c_log">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT log</data>
+      <data key="dData">type/ Log</data>
+    </node>
+    <node id="init">
+      <data key="dVertex">initial</data>
+    </node>
+    <node id="waiting">
+      <data key="dName">Waiting</data>
+      <data key="dData">entry/
+t.once(200)
+log.print('the timer is started')
+print('waiting')</data>
+    </node>
+    <node id="fin">
+      <data key="dVertex">final</data>
+    </node>
+    <edge id="init-waiting" source="init" target="waiting"/>
+    <edge id="waiting-fin" source="waiting" target="fin">
+      <data key="dData">t.TIMEOUT/
+print('timeout, enabled', t.enabled)</data>
+    </edge>
+  </graph>
+</graphml>
