@@ -1,6 +1,6 @@
 {
-  "HSM to Python": "HSM в Python",
-  "Checks the Python code of the diagram, generates its program and runs it on the HSM dispatcher. Needs the hsm-to-python modules with hsmd and CyberiadaML in the Python the plugin runs with.": "Проверяет код Python в диаграмме, генерирует по ней программу и запускает её на диспетчере машин состояний. Нужны модули hsm-to-python, hsmd и CyberiadaML в том Python, с которым работает плагин.",
+  "HSM to Python": "Python на ПРИМС",
+  "Checks the Python code of the diagram, generates its program and runs it on the HSM dispatcher. Needs the hsm-to-python modules with hsmd and CyberiadaML in the Python the plugin runs with.": "Проверяет код Python в диаграмме ПРИМС, генерирует по ней программу и запускает её в диспетчере машин состояний. Для работы нужны модули hsm-to-python, hsmd и CyberiadaML в установке Python, с которой работает плагин.",
   "State machine": "Машина состояний",
   "The state machine to run; empty: the first one": "Запускаемая машина состояний; пусто — первая",
   "Tick, ms": "Такт, мс",
@@ -12,7 +12,7 @@
   "Check the code": "Проверить код",
   "Lint the Python code of the states and the transitions": "Проверить код Python в состояниях и переходах",
   "Generate the program...": "Сгенерировать программу...",
-  "Write the Python program of the diagram into the directory": "Записать программу на Python по диаграмме в каталог",
+  "Write the Python program of the diagram into the directory": "Записать программу на Python по диаграмме ПРИМС в каталог",
   "Run the diagram...": "Запустить диаграмму...",
   "Run the diagram on the dispatcher; its output streams into the plugin's output tab": "Запустить диаграмму на диспетчере; её вывод появляется во вкладке вывода плагина"
 }
