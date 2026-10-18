@@ -81,9 +81,11 @@ debug('E t {}'.format(t))
 debug = print
 import time
 
-Start = int(time.time())
+# the whole seconds since the start: a time event comes within a tick after
+# its second, so round, on the clock of the dispatcher
+Start = time.monotonic()
 def get_t():
-    return int(time.time() - Start)
+    return round(time.monotonic() - Start)
 
 debug('INIT')
 foo = 1</data>
