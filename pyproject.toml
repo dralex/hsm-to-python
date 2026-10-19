@@ -32,3 +32,6 @@ py-modules = ["gencode", "hsm", "hsmcheck", "hsmplugin"]
 [tool.setuptools.data-files]
 "share/cyberiada-pro/plugins/hsm-to-python" = ["editor-plugin/plugin.json"]
 "share/cyberiada-pro/plugins/hsm-to-python/i18n" = ["editor-plugin/i18n/ru.json"]
+"share/cyberiada-pro/plugins/hsm-to-python/icons" = [
+    "editor-plugin/icons/check.svg", "editor-plugin/icons/generate.svg",
+    "editor-plugin/icons/run.svg"]
