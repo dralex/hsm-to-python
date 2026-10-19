@@ -47,7 +47,9 @@ Added:
 - the plugin of CyberiadaPro, the Cyberiada state machine editor (check,
   generate, run)
   and `hsm-run --install-editor-plugin`;
-- the pip installation and the Debian package.
+- the pip installation and the Debian package, which accepts the binding or
+  the pure-Python cyberiadaml-py 1.8 (Python 3.8+) for the `CyberiadaML`
+  module.
 
 Fixed:
 - `hsm-run` runs the program unbuffered: its output reaches a pipe (the

@@ -16,8 +16,8 @@ The code is distributed under the GNU General Public License (version 3).
    `libcyberiadaml`, `libcyberiadamlpp`, `libcyberiadamlpp-py`, each by its
    own README (`cmake` and `make install`, or their Debian packages; check:
    `python3 -c "import CyberiadaML"`), or, when they are not installed, the
-   pure-Python interface of `cyberiadaml-py` 1.8+ (Python 3.10+), which pip
-   installs with the dispatcher. The legacy yEd diagrams need the libraries.
+   pure-Python interface of `cyberiadaml-py` 1.8+, which pip installs with
+   the dispatcher. The legacy yEd diagrams need the libraries.
 2. The dispatcher `hsm-dispatcher-py` and this tool, either as Debian
    packages or with pip.
 
@@ -307,7 +307,7 @@ dispatcher older than the generator needs stops the tests with a message.
 * hsm-dispatcher-py - the Python HSM dispatcher (the `hsmd` module)
 * the `CyberiadaML` module: libcyberiadamlpp-py, the Python binding of the
   libcyberiadamlpp library, with its libraries, or, when it is not installed,
-  cyberiadaml-py (version 1.8+, Python 3.10+), its pure-Python interface
+  cyberiadaml-py (version 1.8+), its pure-Python interface
   (CyberiadaML-GraphML only, not the legacy yEd dialect)
 * pylint or pyflakes - for the code check (optional)
 * cmake (version 3.16+) - for the Debian package
