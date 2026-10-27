@@ -133,22 +133,44 @@ def _set_arguments(defaults):
 '''
 
 FOOTER = '''
-# the time events and the timers come with dispatcher.tick()
-dispatcher = hsmd.Dispatcher(machine, namespace=globals(), period=TICK_LEN / 1000.0)
+# the dispatcher of the machine: the time events and the timers come with its tick()
+dispatcher = None
 
+
+def make_dispatcher(**options):
+    """A new dispatcher of the machine; a session of the editor gives its own
+    clock, trace and output."""
+    global dispatcher  # pylint: disable=global-statement
+    dispatcher = hsmd.Dispatcher(machine, namespace=globals(), period=TICK_LEN / 1000.0,
+                                 **options)
+    return dispatcher
+
+
+def _begin():
+    """Enter the initial states and handle INIT; the outcomes."""
+    outcomes = dispatcher.start()
+    dispatcher.post('INIT')
+    return outcomes + dispatcher.run()
+{loop_function}
 
 def main():
-    dispatcher.start()
-    dispatcher.post('INIT')
-    dispatcher.run()
+    make_dispatcher()
+    _begin()
     while not dispatcher.finished():
-{loop}        dispatcher.tick()
+{loop_call}        dispatcher.tick()
         time.sleep(TICK_LEN / 1000.0)
     return 0
 
 
 if __name__ == '__main__':
     sys.exit(main())
+'''
+
+LOOP_FUNCTION = '''
+
+def _loop():
+    """The Loop section, every iteration before the time events."""
+{code}
 '''
 
 
@@ -621,9 +643,12 @@ class CodeGenerator:
         if functions:
             lines += ['', '', '# The code of the states and the transitions:'] + functions
         lines += ['', '', '# The state machine:', ''] + declarations
-        loop = '\n'.join(indented('\n'.join(self.__lines(SECTION_LOOP)), INDENT * 2))
-        loop = loop + '\n' if loop.strip() else ''
-        text = '\n'.join(lines) + '\n' + FOOTER.format(loop=loop)
+        loop = '\n'.join(indented('\n'.join(self.__lines(SECTION_LOOP)), INDENT))
+        if loop.strip():
+            text = '\n'.join(lines) + '\n' + FOOTER.format(
+                loop_function=LOOP_FUNCTION.format(code=loop), loop_call=INDENT * 2 + '_loop()\n')
+        else:
+            text = '\n'.join(lines) + '\n' + FOOTER.format(loop_function='', loop_call='')
         self.__write(target, text)
 
     # ------------------------------------------------------------------------
@@ -650,6 +675,7 @@ class CodeGenerator:
         program's own, the arguments, the components and the names of the
         initialization code and of the init scripts."""
         defined = set(self.arguments) | {'dispatcher', 'machine', 'main', 'event', 'DISPATCH',
+                                         'make_dispatcher', '_begin', '_loop',
                                          'TICK_LEN', 'hsmd', 'sys', 'time', 'ast'}
         defined |= {d.id for d in self.machine.components}
         for text in [self.__lines(SECTION_INIT)] + [s.split('\n') for _, s in self.__scripts()]:
