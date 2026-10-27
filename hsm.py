@@ -21,6 +21,7 @@
 #
 #  -----------------------------------------------------------------------------
 
+import importlib.util
 import os
 import signal
 import subprocess
@@ -35,6 +36,9 @@ EXIT_PARSER = 1
 EXIT_GENERATOR = 2
 EXIT_UNEXPECTED = 3
 EXIT_TIMEOUT = 4
+MS_IN_SECOND = 1000.0
+# the dispatcher that serves the editor's sessions
+SESSION_DISPATCHER = '0.2'
 
 
 def install_plugin():
@@ -66,6 +70,54 @@ def run_program(command, timeout):
             signal.signal(signal.SIGTERM, previous)
 
 
+class Program:
+    """The generated program of a session, imported anew at every start of the
+    machine, so a restart also resets the variables of the diagram."""
+
+    def __init__(self, path, argv):
+        self.path = path
+        self.argv = argv
+        self.module = None
+        self.starts = 0
+
+    def make(self, **options):
+        """Import the program anew and return its new dispatcher."""
+        self.starts += 1
+        spec = importlib.util.spec_from_file_location('hsm_program_{}'.format(self.starts), self.path)
+        module = importlib.util.module_from_spec(spec)
+        saved = sys.argv
+        # the arguments of the diagram come from the program's own command line
+        sys.argv = [self.path] + self.argv
+        try:
+            spec.loader.exec_module(module)
+        finally:
+            sys.argv = saved
+        self.module = module
+        return module.make_dispatcher(**options)
+
+    def begin(self, dispatcher):  # pylint: disable=unused-argument
+        """Enter the initial states and handle INIT, as the program does."""
+        return self.module._begin()  # pylint: disable=protected-access
+
+    def loop(self):
+        """The Loop section of the diagram, when it has one."""
+        if hasattr(self.module, '_loop'):
+            self.module._loop()  # pylint: disable=protected-access
+
+
+def serve(path, argv, tick):
+    """The --session command: the program served to the editor step by step."""
+    try:
+        import hsmd_session  # pylint: disable=import-outside-toplevel
+    except ImportError:
+        sys.stderr.write('The session needs hsm-dispatcher-py {} or later (hsmd_session)\n'.format(
+            SESSION_DISPATCHER))
+        return EXIT_GENERATOR
+    program = Program(path, argv)
+    return hsmd_session.Session(program.make, tick / MS_IN_SECOND, start=program.begin,
+                                loop=program.loop).serve()
+
+
 def run():
     if '--install-editor-plugin' in sys.argv:
         return install_plugin()
@@ -79,6 +131,9 @@ def run():
     parser.add_argument('--check', action='store_true',
                         help='check the code of the diagram first, refuse it with errors')
     parser.add_argument('--keep', action='store_true', help='keep the generated program')
+    parser.add_argument('--session', action='store_true',
+                        help='serve the diagram to the CyberiadaPro editor step by step on stdin '
+                             'and stdout instead of running it')
     parser.add_argument('--install-editor-plugin', metavar='DIR', nargs='?', const='',
                         help='copy the editor plugin into the plugin folder of the editor '
                              '(or into DIR) and exit')
@@ -95,16 +150,19 @@ def run():
         hsmcheck.warn(generator)
     with tempfile.NamedTemporaryFile(prefix='hsm-', suffix='.py', delete=False) as program:
         path = program.name
-    # unbuffered: the output reaches a pipe line by line and survives a kill
-    command = [sys.executable, '-u', path]
+    program_args = []
     for pair in args.set:
-        command += ['--set', pair]
+        program_args += ['--set', pair]
     if args.settings:
-        command += ['--settings', args.settings]
+        program_args += ['--settings', args.settings]
+    # unbuffered: the output reaches a pipe line by line and survives a kill
+    command = [sys.executable, '-u', path] + program_args
     try:
         generator.generate_code(path)
         if args.keep:
             sys.stderr.write('The program is kept in {}\n'.format(path))
+        if args.session:
+            return serve(path, program_args, args.tick)
         return run_program(command, args.timeout)
     except gencode.GeneratorError as e:
         sys.stderr.write('Code generating error: {}\n'.format(e))

@@ -70,6 +70,9 @@ if(Python3_FOUND)
   add_test(NAME runner
            COMMAND ${Python3_EXECUTABLE} -B runner_test.py
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+  add_test(NAME session
+           COMMAND ${Python3_EXECUTABLE} -B session_test.py
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
 endif()
 
 # optional per-release suffix (e.g. ubuntu2404) for the package version: the
