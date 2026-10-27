@@ -23,12 +23,14 @@ of the dispatcher (`hsm-dispatcher-py/docs/ARCHITECTURE.md`).
  the states, the transitions ─────────────▶  machine = hsmd.Machine(...)
  CGML_COMPONENT <id>    ──────────────────▶      hsmd.Declaration(...) in the machine
  CGML_META order, propagation ────────────▶      Machine(transition_order=, propagate=)
-                                             dispatcher = hsmd.Dispatcher(machine, ...)
+                                             make_dispatcher(): hsmd.Dispatcher(...)
                                                  the components are built here
+                                             _begin(): start, post INIT
+ Loop                   ──────────────────▶  _loop(): the loop code
                                              main():
-                                                 start, post INIT
+                                                 make_dispatcher(), _begin()
                                                  while the machine is not finished:
- Loop                   ──────────────────▶          the loop code
+                                                     _loop()
                                                      tick(): the time events, the timers
                                                      sleep TICK_LEN
  any other comment      ──▶ not in the program
@@ -172,10 +174,10 @@ if iteration in SCRIPT:
     DISPATCH(name, **parameters)
 ```
 
-**The loop code is the body of a function, not the module code.** To assign a global it
-needs `global name`; without it the assignment makes a local name and the program fails
-with `UnboundLocalError`. The code of the states and the transitions does not need
-`global`: the generator declares the names it assigns. `DISPATCH()` and `dispatcher` are
+**The loop code is the body of the function `_loop()`, not the module code.** To assign
+a global it needs `global name`; without it the assignment makes a local name and the
+program fails with `UnboundLocalError`. The code of the states and the transitions does
+not need `global`: the generator declares the names it assigns. `DISPATCH()` and `dispatcher` are
 available.
 
 ## The formal comments of the dispatcher

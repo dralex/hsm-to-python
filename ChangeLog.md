@@ -1,5 +1,20 @@
 # hsm-to-python project changelog
 
+## Version 2.1.0 (unreleased)
+
+Added:
+- `hsm-run --session`: the program served to CyberiadaPro step by step over
+  the dispatcher's session (`hsmd_session`, hsm-dispatcher-py 0.2): the
+  states marked in the editor, the event, input and time steps, the runs at
+  a speed, the replay of a stream, the saved log; the program is imported
+  anew at every restart;
+- the session action *Run step by step...* of the editor plugin.
+
+Changed:
+- the generated program makes its dispatcher in `make_dispatcher()`, enters
+  the machine in `_begin()` and runs the Loop section as `_loop()`; `main()`
+  calls them, so a session drives the same program.
+
 ## Version 2.0.0
 
 Changed:

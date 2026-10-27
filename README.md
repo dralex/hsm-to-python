@@ -78,7 +78,11 @@ and tell where). `hsm-gencode --check` refuses a diagram with errors, and
 `hsm-gencode --lint out.py` writes the lint view instead of the program.
 `hsm-run` runs the program unbuffered, so its output comes line by line into
 a pipe too; the timeout and a SIGTERM to `hsm-run` stop the program as well
-(on Windows a killed `hsm-run` leaves the program running).
+(on Windows a killed `hsm-run` leaves the program running). `hsm-run
+--session` serves the program to CyberiadaPro step by step instead of running
+it: the dispatcher's session on stdin and stdout (`hsmd_session` of
+hsm-dispatcher-py 0.2 or later), on a virtual clock; the program is imported
+anew at every restart, so the variables of the diagram start over.
 
 The generated program is the Python code of the machine: the code of every
 state and transition is a function, the structure is one `hsmd.Machine`
@@ -247,12 +251,16 @@ defined at module level.
 ## The editor plugin
 
 `editor-plugin/` holds the plugin for CyberiadaPro (its plugin
-interface, level 1): the actions *Check the code* (the findings appear on
+interface): the actions *Check the code* (the findings appear on
 the elements), *Generate the program...* (into a chosen directory) and *Run
 the diagram...* (the output streams into the plugin's output tab; the time
 limit, no failure, and Cancel stop the program; the arguments as `name =
-value` lines). Install the directory as `hsm-to-python/` into the
-editor's plugin folder: the Debian package does it, `hsm-run
+value` lines), and the session action *Run step by step...* (`hsm-run
+--session`): the editor marks the active states and the fired transitions,
+steps by an event, an input or a tick, runs at a speed, posts events, replays
+a stream of timed events and saves the inputs as one. An editor without the
+plugin sessions shows the other actions only. Install the directory as
+`hsm-to-python/` into the editor's plugin folder: the Debian package does it, `hsm-run
 --install-editor-plugin` does it for a pip installation (see Installation,
 and the editor's `docs/PLUGIN-API.md`, Packaging). The plugin runs the
 modules of this tool with the Python it was installed with. The actions
@@ -273,6 +281,8 @@ none and saves the diagram before the run. To try it from the repository, with
     python3 standalone_test.py      # a generated program runs without the diagram and CyberiadaML,
                                     # the minute events on a faster clock
     python3 plugin_test.py          # the editor plugin in the batch mode of the editor
+    python3 runner_test.py          # hsm-run into a pipe: the timeout, a SIGTERM
+    python3 session_test.py         # hsm-run --session against a scripted editor
 
 Each test is a diagram `test/graphs/<name>.graphml` with the expected output
 of its program in `<name>.txt`; `HSMException` as the expected output means
