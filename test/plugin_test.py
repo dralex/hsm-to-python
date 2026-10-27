@@ -77,8 +77,9 @@ def installer():
         folder = hsmplugin.install(directory)
         with open(os.path.join(folder, hsmplugin.DESCRIPTOR), encoding='utf-8') as f:
             descriptor = json.load(f)
+        actions = descriptor['actions'] + descriptor.get('session', {}).get('actions', [])
         pinned = ('interpreter' not in descriptor and
-                  all(a['argv'][0] == sys.executable for a in descriptor['actions']))
+                  all(a['argv'][0] == sys.executable for a in actions))
         translated = os.path.isfile(os.path.join(folder, 'i18n', 'ru.json'))
         if folder != os.path.join(directory, PLUGIN) or not pinned or not translated:
             print('FAIL install: {} {}'.format(folder, descriptor.get('actions')))
@@ -108,7 +109,8 @@ def translation():
     with open(os.path.join(REPOSITORY, 'editor-plugin', 'i18n', 'ru.json'), encoding='utf-8') as f:
         ru = json.load(f)
     texts = {descriptor['name'], descriptor.get('description', '')}
-    for item in descriptor.get('parameters', []) + descriptor['actions']:
+    sessions = descriptor.get('session', {}).get('actions', [])
+    for item in descriptor.get('parameters', []) + descriptor['actions'] + sessions:
         texts.update([item.get('label', ''), item.get('description', '')])
         texts.update(item.get('choices', []))
     texts.discard('')
@@ -129,6 +131,7 @@ def main():
         return 1 if failed else 0
     print('editor: {}'.format(os.path.realpath(binary)))
     code, out = batch(binary, '--plugin-path', '.', '--list-plugins')
+    listing = out
     if code != 0 or PLUGIN not in out or 'enabled' not in out:
         print('FAIL list: exit {}\n{}'.format(code, out))
         failed += 1
@@ -183,7 +186,35 @@ def main():
             failed += 1
         else:
             print('ok   run')
+        failed += session(binary, forever, directory, listing)
     return 1 if failed else 0
+
+
+SESSION_SCRIPT = '''# the first state, a step to the time event, its marks
+expect-active n0
+expect-fired e0
+step
+expect-active n0
+expect-fired n0
+stop
+'''
+
+
+def session(binary, diagram, directory, listing):
+    """The step by step run through an editor with the plugin sessions."""
+    if 'session: step' not in listing:
+        print('skipped session: the editor has no plugin sessions')
+        return 0
+    script = os.path.join(directory, 'forever.session')
+    with open(script, 'w', encoding='utf-8') as f:
+        f.write(SESSION_SCRIPT)
+    code, out = batch(binary, diagram, '--plugin-path', '.', '--run-plugin', PLUGIN + ':step',
+                      '--session-script', script, '--dump-session')
+    if code != 0 or 'log text=RUNNING' not in out or 'history event=TIME_TICK_1S' not in out:
+        print('FAIL session: exit {}\n{}'.format(code, out))
+        return 1
+    print('ok   session')
+    return 0
 
 
 if __name__ == '__main__':

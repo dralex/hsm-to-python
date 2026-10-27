@@ -165,5 +165,48 @@
         "settings"
       ]
     }
-  ]
+  ],
+  "session": {
+    "version": 1,
+    "actions": [
+      {
+        "id": "step",
+        "label": "Run step by step...",
+        "save": true,
+        "meta": {
+          "platformLanguage": "Python"
+        },
+        "icon": "icons/step.svg",
+        "toolbar": true,
+        "description": "Run the diagram on the dispatcher one event at a time; the editor marks the active states and the fired transitions",
+        "argv": [
+          "-m",
+          "hsm",
+          "${document}",
+          "--session",
+          "--tick",
+          "${param:tick}",
+          {
+            "if": "main",
+            "argv": [
+              "--main",
+              "${param:main}"
+            ]
+          },
+          {
+            "if": "settings",
+            "argv": [
+              "--settings",
+              "${param-file:settings}"
+            ]
+          }
+        ],
+        "parameters": [
+          "main",
+          "tick",
+          "settings"
+        ]
+      }
+    ]
+  }
 }

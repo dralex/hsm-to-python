@@ -14,5 +14,7 @@
   "Generate the program...": "Сгенерировать программу...",
   "Write the Python program of the diagram into the directory": "Записать программу на Python по диаграмме ПРИМС в каталог",
   "Run the diagram...": "Запустить диаграмму...",
-  "Run the diagram on the dispatcher; its output streams into the plugin's output tab": "Запустить диаграмму на диспетчере; её вывод появляется во вкладке вывода плагина"
+  "Run the diagram on the dispatcher; its output streams into the plugin's output tab": "Запустить диаграмму на диспетчере; её вывод появляется во вкладке вывода плагина",
+  "Run step by step...": "Выполнить по шагам...",
+  "Run the diagram on the dispatcher one event at a time; the editor marks the active states and the fired transitions": "Выполнить диаграмму на диспетчере по одному событию; редактор отмечает активные состояния и сработавшие переходы"
 }

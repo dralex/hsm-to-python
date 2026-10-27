@@ -82,7 +82,8 @@ def pinned(descriptor, executable):
     """The descriptor whose commands start with the given Python instead of
     the interpreter the editor would look up."""
     if descriptor.pop('interpreter', None) is not None:
-        for action in descriptor.get('actions', []):
+        sessions = descriptor.get('session', {}).get('actions', [])
+        for action in descriptor.get('actions', []) + sessions:
             action['argv'] = [executable] + list(action.get('argv', []))
     return descriptor
 
