@@ -33,8 +33,8 @@ import sys
 import tempfile
 
 import hsmd
-import hsmd_components
-import hsmd_reader
+import hsmd.components
+import hsmd.reader
 
 import gencode
 
@@ -76,16 +76,16 @@ class Finding:
 
 
 # the events a trigger may name without anything posting them
-SPECIAL_EVENTS = (hsmd_reader.EVENT_ANY, hsmd_reader.EVENT_UNKNOWN)
+SPECIAL_EVENTS = (hsmd.reader.EVENT_ANY, hsmd.reader.EVENT_UNKNOWN)
 SIGNAL_SEPARATOR = '.'
 # the calls that post an event: DISPATCH('X'), dispatcher.post('X'), dispatcher.send('X')
 POSTING_METHODS = ('post', 'send')
-STATE_KINDS = (hsmd_reader.STATE, hsmd_reader.COMPOSITE)
+STATE_KINDS = (hsmd.reader.STATE, hsmd.reader.COMPOSITE)
 # the rules of the machine checks, before the linter's
 MODEL_RULES = ('unknown-event', 'unknown-signal', 'unhandled-event', 'unreachable',
                'no-initial', 'no-else')
-CONTAINER_LABELS = {hsmd_reader.CHOICE: 'choice', hsmd_reader.FINAL: 'final',
-                    hsmd_reader.TERMINATE: 'terminate'}
+CONTAINER_LABELS = {hsmd.reader.CHOICE: 'choice', hsmd.reader.FINAL: 'final',
+                    hsmd.reader.TERMINATE: 'terminate'}
 
 
 # ----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ def _signals(generator):
     scripts = _script_types(generator)
     result = {}
     for declaration in generator.machine.components:
-        cls = hsmd_components.find(declaration.type)
+        cls = hsmd.components.find(declaration.type)
         if declaration.type in scripts or cls is None:
             signals = scripts.get(declaration.type)
         else:
@@ -277,7 +277,7 @@ def structure(generator, possible):
             if v not in reached:
                 reached.add(v)
                 work.append(v)
-        states = [c for c in vertex.children if c.kind not in hsmd_reader.POINT_KINDS]
+        states = [c for c in vertex.children if c.kind not in hsmd.reader.POINT_KINDS]
         if vertex.kind in STATE_KINDS and states:
             if vertex.initial is not None:
                 arrive(vertex.initial)
@@ -297,7 +297,7 @@ def structure(generator, possible):
                 and (vertex.parent in reached or vertex.parent is machine.root)):
             findings.append(Finding(WARNING, 'unreachable', _vertex_where(machine, vertex),
                                     vertex.id, None, 'no transition leads here'))
-        if (vertex.kind == hsmd_reader.CHOICE and vertex.reactions and
+        if (vertex.kind == hsmd.reader.CHOICE and vertex.reactions and
                 all(r.guard and not r.is_else() for r in vertex.reactions)):
             findings.append(Finding(WARNING, 'no-else', _vertex_where(machine, vertex),
                                     vertex.id, None, 'every way out has a guard and none is '
@@ -336,7 +336,8 @@ def _command(name):
 
 def _environment():
     env = dict(os.environ)
-    paths = [os.path.dirname(os.path.abspath(hsmd.__file__)),
+    # the directory holding the package hsmd, not the package itself
+    paths = [os.path.dirname(os.path.dirname(os.path.abspath(hsmd.__file__))),
              os.path.dirname(os.path.abspath(gencode.__file__))]
     env['PYTHONPATH'] = os.pathsep.join(paths + [env['PYTHONPATH']] if env.get('PYTHONPATH')
                                         else paths)

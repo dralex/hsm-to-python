@@ -4,7 +4,7 @@
 
 Added:
 - `hsm-run --session`: the program served to CyberiadaPro step by step over
-  the dispatcher's session (`hsmd_session`, hsm-dispatcher-py 0.2): the
+  the dispatcher's session (`hsmd.session`, hsm-dispatcher-py 0.2): the
   states marked in the editor, the event, input and time steps, the runs at
   a speed, the replay of a stream, the saved log; the program is imported
   anew at every restart;

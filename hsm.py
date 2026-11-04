@@ -108,13 +108,13 @@ class Program:
 def serve(path, argv, tick):
     """The --session command: the program served to the editor step by step."""
     try:
-        import hsmd_session  # pylint: disable=import-outside-toplevel
+        import hsmd.session  # pylint: disable=import-outside-toplevel
     except ImportError:
-        sys.stderr.write('The session needs hsm-dispatcher-py {} or later (hsmd_session)\n'.format(
+        sys.stderr.write('The session needs hsm-dispatcher-py {} or later (hsmd.session)\n'.format(
             SESSION_DISPATCHER))
         return EXIT_GENERATOR
     program = Program(path, argv)
-    return hsmd_session.Session(program.make, tick / MS_IN_SECOND, start=program.begin,
+    return hsmd.session.Session(program.make, tick / MS_IN_SECOND, start=program.begin,
                                 loop=program.loop).serve()
 
 

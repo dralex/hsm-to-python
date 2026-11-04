@@ -80,7 +80,7 @@ and tell where). `hsm-gencode --check` refuses a diagram with errors, and
 a pipe too; the timeout and a SIGTERM to `hsm-run` stop the program as well
 (on Windows a killed `hsm-run` leaves the program running). `hsm-run
 --session` serves the program to CyberiadaPro step by step instead of running
-it: the dispatcher's session on stdin and stdout (`hsmd_session` of
+it: the dispatcher's session on stdin and stdout (`hsmd.session` of
 hsm-dispatcher-py 0.2 or later), on a virtual clock; the program is imported
 anew at every restart, so the variables of the diagram start over.
 

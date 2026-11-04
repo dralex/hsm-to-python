@@ -28,8 +28,8 @@ import re
 import sys
 import unicodedata
 
-import hsmd_components
-import hsmd_reader
+import hsmd.components
+import hsmd.reader
 
 VERSION = '2.0'
 TICK_LEN = 100                          # the period of TIME_TICK, ms
@@ -437,8 +437,8 @@ class MachineCode:
     @staticmethod
     def pseudostate(vertex, parent, depth):
         """hsmd.Initial(...), hsmd.EntryPoint(...) and the like."""
-        if vertex.kind in (hsmd_reader.ENTRY, hsmd_reader.EXIT):
-            cls = 'EntryPoint' if vertex.kind == hsmd_reader.ENTRY else 'ExitPoint'
+        if vertex.kind in (hsmd.reader.ENTRY, hsmd.reader.EXIT):
+            cls = 'EntryPoint' if vertex.kind == hsmd.reader.ENTRY else 'ExitPoint'
             args = [repr(vertex.name)]
             default = '{}.{}'.format(parent.id, vertex.name)
         else:
@@ -447,15 +447,15 @@ class MachineCode:
             default = '{}.{}'.format(parent.id, vertex.kind)
         if vertex.id != default:
             args.append('id={!r}'.format(vertex.id))
-        if vertex.kind == hsmd_reader.CHOICE and vertex.name:
+        if vertex.kind == hsmd.reader.CHOICE and vertex.name:
             args.append('name={!r}'.format(vertex.name))
-        if vertex.kind == hsmd_reader.DEEP:
+        if vertex.kind == hsmd.reader.DEEP:
             args.append('deep=True')
         return [INDENT * depth + 'hsmd.{}({}),'.format(cls, ', '.join(args))]
 
     def vertex(self, vertex, parent, depth):
         """The declaration of a vertex, as lines."""
-        if vertex.kind in (hsmd_reader.STATE, hsmd_reader.COMPOSITE):
+        if vertex.kind in (hsmd.reader.STATE, hsmd.reader.COMPOSITE):
             return self.state(vertex, depth)
         return self.pseudostate(vertex, parent, depth)
 
@@ -518,7 +518,7 @@ class MachineCode:
         head = ['{!r}'.format(machine.name)]
         if machine.id != machine.name:
             head.append('id={!r}'.format(machine.id))
-        if machine.transition_order == hsmd_reader.EXIT_FIRST:
+        if machine.transition_order == hsmd.reader.EXIT_FIRST:
             head.append('transition_order={!r}'.format(machine.transition_order))
         if machine.propagate:
             head.append('propagate=True')
@@ -533,8 +533,8 @@ class CodeGenerator:
         self.graph_file = graph_file
         self.tick_len = tick_len
         try:
-            self.machines = hsmd_reader.load(graph_file)
-        except hsmd_reader.DocumentError as e:
+            self.machines = hsmd.reader.load(graph_file)
+        except hsmd.reader.DocumentError as e:
             raise ParserError(str(e)) from e
         self.machine = self.__select(self.machines, main)
         # the convention comments belong to the program: every machine's count
@@ -702,7 +702,7 @@ class CodeGenerator:
         result = []
         for machine in self.machines:
             for vertex in machine.vertices.values():
-                if hsmd_reader.INLINE_SEPARATOR in vertex.id:
+                if hsmd.reader.INLINE_SEPARATOR in vertex.id:
                     continue
                 for kind, group in (('entry', vertex.entry), ('exit', vertex.exit)):
                     for index, block in enumerate(group):
@@ -734,7 +734,7 @@ class CodeGenerator:
                   "event = hsmd.Event('')", '', '# The components:']
         for declaration in self.machine.components:
             ctype = declaration.type
-            if hsmd_components.find(ctype) is not None:    # a type of the dispatcher
+            if hsmd.components.find(ctype) is not None:    # a type of the dispatcher
                 ctype = 'hsmd.' + ctype
             lines.append('{} = {}({!r}, None)'.format(declaration.id, ctype, declaration.id))
         # the names the program defines, so a block's new global gets a definition

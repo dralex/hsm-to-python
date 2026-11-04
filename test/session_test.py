@@ -87,10 +87,11 @@ def test_session():
 
 
 def test_old_dispatcher():
-    """A dispatcher without hsmd_session: the session is refused with the version."""
+    """A dispatcher without hsmd.session: the session is refused with the version."""
     with tempfile.TemporaryDirectory() as blocked:
-        with open(os.path.join(blocked, 'hsmd_session.py'), 'w', encoding='utf-8') as f:
-            f.write("raise ImportError('an older dispatcher')\n")
+        # a package cannot be shadowed in part: the start-up hook hides the session
+        with open(os.path.join(blocked, 'sitecustomize.py'), 'w', encoding='utf-8') as f:
+            f.write("import sys\nsys.modules['hsmd.session'] = None\n")
         env = dict(os.environ, PYTHONPATH=os.pathsep.join([blocked, os.environ.get('PYTHONPATH', '')]))
         messages, code, err = session(env)
     if code != hsm.EXIT_GENERATOR or messages or hsm.SESSION_DISPATCHER not in err:
