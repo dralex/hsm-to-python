@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 # the Debian package of the generator, its commands and its editor plugin;
 # nothing is compiled
-project(hsm-to-python VERSION 2.0.0 LANGUAGES NONE)
+project(hsm-to-python VERSION 2.1.0 LANGUAGES NONE)
 
 # the place of the pure Python modules on Debian
 set(PYTHON_INSTALL_DIR "lib/python3/dist-packages" CACHE STRING

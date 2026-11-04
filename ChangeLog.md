@@ -1,6 +1,6 @@
 # hsm-to-python project changelog
 
-## Version 2.1.0 (unreleased)
+## Version 2.1.0
 
 Added:
 - `hsm-run --session`: the program served to CyberiadaPro step by step over
@@ -14,6 +14,8 @@ Changed:
 - the generated program makes its dispatcher in `make_dispatcher()`, enters
   the machine in `_begin()` and runs the Loop section as `_loop()`; `main()`
   calls them, so a session drives the same program.
+- hsm-dispatcher-py 0.2 is required: the dispatcher is its package `hsmd`
+  (`hsmd.reader`, `hsmd.components`, `hsmd.session`).
 
 ## Version 2.0.0
 

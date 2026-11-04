@@ -4,18 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hsm-to-python"
-version = "2.0.0"
+version = "2.1.0"
 description = "Python programs of the CyberiadaML state machine diagrams on the HSM dispatcher"
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [{name = "Alexey Fedoseev", email = "aleksey@fedoseev.net"}]
-dependencies = ["hsm-dispatcher-py"]
+dependencies = ["hsm-dispatcher-py>=0.2"]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
 ]
 
-# hsm-dispatcher-py (the hsmd module) and the CyberiadaML module of
+# hsm-dispatcher-py (the hsmd package) and the CyberiadaML module of
 # libcyberiadamlpp-py are required as well; both are installed from their
 # own source trees, not from a package index
 

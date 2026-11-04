@@ -31,7 +31,7 @@ import unicodedata
 import hsmd.components
 import hsmd.reader
 
-VERSION = '2.0'
+VERSION = '2.1'
 TICK_LEN = 100                          # the period of TIME_TICK, ms
 # the events the program posts itself; the time events come from the dispatcher
 PROGRAM_EVENTS = ('INIT',)
