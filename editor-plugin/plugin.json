@@ -63,6 +63,11 @@
       "meta": {
         "platformLanguage": "Python"
       },
+      "when": [
+        "sm",
+        "!fa",
+        "meta:platformLanguage=Python"
+      ],
       "outdir": "dir",
       "description": "Write the Python program of the diagram into the directory",
       "argv": [
@@ -94,6 +99,11 @@
       "meta": {
         "platformLanguage": "Python"
       },
+      "when": [
+        "sm",
+        "!fa",
+        "meta:platformLanguage=Python"
+      ],
       "exit_ok": [
         0,
         1
@@ -127,6 +137,11 @@
       "meta": {
         "platformLanguage": "Python"
       },
+      "when": [
+        "sm",
+        "!fa",
+        "meta:platformLanguage=Python"
+      ],
       "timeout": 0,
       "exit_ok": [
         0,
@@ -176,6 +191,11 @@
         "meta": {
           "platformLanguage": "Python"
         },
+        "when": [
+          "sm",
+          "!fa",
+          "meta:platformLanguage=Python"
+        ],
         "icon": "icons/step.svg",
         "toolbar": true,
         "description": "Run the diagram on the dispatcher one event at a time; the editor marks the active states and the fired transitions",

@@ -265,7 +265,10 @@ plugin sessions shows the other actions only. Install the directory as
 and the editor's `docs/PLUGIN-API.md`, Packaging). The plugin runs the
 modules of this tool with the Python it was installed with. The actions
 declare the platform language Python: the editor sets it on a diagram that has
-none and saves the diagram before the run. To try it from the repository, with
+none and saves the diagram before the run. They also declare the diagrams they
+fit, so an editor with the plugin conditions greys them out on a diagram
+without a state machine, on a finite automaton and on a diagram in another
+platform language. To try it from the repository, with
 `hsmd` on the Python path, on a copy of the test diagrams:
 
     cp -r test/graphs /tmp/graphs

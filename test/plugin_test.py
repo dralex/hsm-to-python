@@ -166,6 +166,15 @@ def main():
             failed += 1
         else:
             print('ok   check bad')
+        # nothing to check on an empty document: the editor refuses the action
+        code, out = batch(binary, '--plugin-path', '.', '--run-plugin', PLUGIN + ':check',
+                          '--dump-plugin')
+        if code != 6 or 'the document has no state machine' not in out:
+            print('FAIL check empty (an editor older than the conditions of the actions, '
+                  'EDIT-PLUG-52?): exit {}\n{}'.format(code, out))
+            failed += 1
+        else:
+            print('ok   check empty')
         program_dir = os.path.join(directory, 'program')
         code, out = batch(binary, vacuum, '--plugin-path', '.',
                           '--run-plugin', PLUGIN + ':generate', '--plugin-param',

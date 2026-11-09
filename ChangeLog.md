@@ -1,5 +1,12 @@
 # hsm-to-python project changelog
 
+## Version 2.1.1 (unreleased)
+
+Changed:
+- the actions of the editor plugin declare the diagrams they fit (`when`): an
+  editor with the plugin conditions greys them out on a diagram without a state
+  machine, on a finite automaton and on a diagram in another platform language.
+
 ## Version 2.1.0
 
 Added:
