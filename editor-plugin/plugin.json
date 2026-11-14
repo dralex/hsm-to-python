@@ -2,7 +2,7 @@
   "api": 1,
   "id": "hsm-to-python",
   "name": "HSM to Python",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Checks the Python code of the diagram, generates its program and runs it on the HSM dispatcher. Needs the hsm-to-python modules with hsmd and CyberiadaML in the Python the plugin runs with.",
   "interpreter": "python3",
   "env": {
