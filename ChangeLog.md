@@ -1,6 +1,6 @@
 # hsm-to-python project changelog
 
-## Version 2.1.1 (unreleased)
+## Version 2.1.1
 
 Changed:
 - the actions of the editor plugin declare the diagrams they fit (`when`): an
