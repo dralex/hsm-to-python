@@ -25,7 +25,7 @@ The Debian packages, built in each repository:
 
     cmake -B build && cd build && ctest && cpack -G DEB
 
-    sudo apt install ./python3-hsm-dispatcher_0.2.0_all.deb
+    sudo apt install ./python3-hsm-dispatcher_0.2.1_all.deb
     sudo apt install ./python3-hsm-to-python_2.1.1_all.deb
 
 `ctest` runs the tests with the Python CMake finds (`-DPython3_EXECUTABLE=...`
